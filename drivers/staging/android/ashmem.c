@@ -123,7 +123,13 @@ static struct kmem_cache *ashmem_range_cachep __read_mostly;
 
 #define PROT_MASK		(PROT_EXEC | PROT_READ | PROT_WRITE)
 
-
+/**
+ * lru_add() - Adds a range of memory to the LRU list
+ * @range:     The memory range being added.
+ *
+ * The range is first added to the end (tail) of the LRU list.
+ * After this, the size of the range is added to @lru_count
+ */
 static inline void lru_add(struct ashmem_range *range)
 {
 	list_add_tail(&range->lru, &ashmem_lru_list);
@@ -190,7 +196,18 @@ static void range_del(struct ashmem_range *range)
 	kmem_cache_free(ashmem_range_cachep, range);
 }
 
-
+/**
+ * range_shrink() - Shrinks an ashmem_range
+ * @range:	    The associated ashmem_range being shrunk
+ * @start:	    The starting byte of the new range
+ * @end:	    The ending byte of the new range
+ *
+ * This does not modify the data inside the existing range in any way - It
+ * simply shrinks the boundaries of the range.
+ *
+ * Theoretically, with a little tweaking, this could eventually be changed
+ * to range_resize, and expand the lru_count if the new range is larger.
+ */
 static inline void range_shrink(struct ashmem_range *range,
 				size_t start, size_t end)
 {
