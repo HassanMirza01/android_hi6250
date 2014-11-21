@@ -1770,6 +1770,8 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, u32 ocr)
 		pr_warn("%s: cannot verify signal voltage switch\n",
 			mmc_hostname(host));
 
+	mmc_host_clk_hold(host);
+
 	cmd.opcode = SD_SWITCH_VOLTAGE;
 	cmd.arg = 0;
 	/*
@@ -1779,18 +1781,18 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, u32 ocr)
 	cmd.flags = MMC_RSP_PRESENT | MMC_RSP_OPCODE | MMC_CMD_AC | MMC_RSP_136;
 
 	err = mmc_wait_for_cmd(host, &cmd, 0);
-	if (err)
-	{
-       if(!strcmp(mmc_hostname(host),"mmc1"))
-	   {
-	       printk(KERN_ERR "%s:send cmd11 fail,err=%d\n",mmc_hostname(host),err);
-	   }
-		return -EAGAIN;
+	if (err) {
+		if(!strcmp(mmc_hostname(host),"mmc1")) {
+			printk(KERN_ERR "%s:send cmd11 fail,err=%d\n",mmc_hostname(host),err);
+		}
+		err = -EAGAIN;
+		goto err_command;
 	}
-	if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR))
-		return -EIO;
 
-	mmc_host_clk_hold(host);
+	if (!mmc_host_is_spi(host) && (cmd.resp[0] & R1_ERROR)) {
+		err = -EIO;
+		goto err_command;
+	}
 	/*
 	 * The card should drive cmd and dat[0:3] low immediately
 	 * after the response of cmd11, but wait 1 ms to be sure
@@ -1851,6 +1853,8 @@ power_cycle:
 	{
 		printk(KERN_ERR "%s:host and card voltage have changed into 1.8v success!\n",mmc_hostname(host));
 	}
+
+err_command:
 	mmc_host_clk_release(host);
 
 	return err;
