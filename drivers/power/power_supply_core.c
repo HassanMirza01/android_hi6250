@@ -520,7 +520,7 @@ EXPORT_SYMBOL_GPL(power_supply_unreg_notifier);
 
 #ifdef CONFIG_THERMAL
 static int power_supply_read_temp(struct thermal_zone_device *tzd,
-		unsigned long *temp)
+		int *temp)
 {
 	struct power_supply *psy;
 	union power_supply_propval val;
@@ -607,7 +607,7 @@ static int battery_tz_get_trip_type(struct thermal_zone_device *thermal,
 }
 
 static int battery_tz_get_trip_temp(struct thermal_zone_device *thermal,
-				   int trip, unsigned long *temp)
+				   int trip, int *temp)
 {
 	struct power_supply *power_supply = (struct power_supply *)thermal->devdata;
 

@@ -42,9 +42,9 @@ extern bool is_spm_mode_enabled(void);
 
 u32 profile_freq[NUM_CLUSTERS];
 int get_profile_power(enum ipa_actor actor, unsigned int *power);
-int hisi_calc_static_power(const struct cpumask *cpumask, unsigned long temp,
+int hisi_calc_static_power(const struct cpumask *cpumask, int temp,
 				unsigned long u_volt, u32 *static_power);
-int get_soc_target_temp(struct thermal_cooling_device *cdev, unsigned long *target_temp);
+int get_soc_target_temp(struct thermal_cooling_device *cdev, int *target_temp);
 #endif
 extern unsigned int g_ipa_freq_limit[];
 #endif
@@ -906,7 +906,7 @@ static int cpufreq_freq2volt(struct cpufreq_cooling_device *cpufreq_device, unsi
 
 static int cpufreq_power2freq(struct thermal_cooling_device *cdev, u32 power, u32 *freq)
 {
-	unsigned long target_temp = 0;
+	int target_temp = 0;
 	struct cpufreq_cooling_device *cpufreq_device = cdev->devdata;
 	struct power_table *pt = cpufreq_device->dyn_power_table;
 	int i, ret;

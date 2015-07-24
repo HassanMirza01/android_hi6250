@@ -34,7 +34,7 @@ extern int get_profile_power(enum ipa_actor actor,
 unsigned long hisi_calc_gpu_static_power(unsigned long voltage,
 					unsigned long temperature);
 int get_soc_target_temp(struct thermal_cooling_device *cdev,
-					unsigned long *target_temp);
+					int *target_temp);
 #endif
 extern unsigned int g_ipa_freq_limit[];
 extern int update_devfreq(struct devfreq *devfreq);
@@ -550,7 +550,7 @@ static int devfreq_freq2volt(struct devfreq_cooling_device *dfc, unsigned long f
 
 static int devfreq_power2freq(struct thermal_cooling_device *cdev, u32 power, u32 *freq)
 {
-	unsigned long target_temp = 0;
+	int target_temp = 0;
 	struct devfreq_cooling_device *dfc = cdev->devdata;
 	int i, ret;
 	unsigned long voltage = 0;

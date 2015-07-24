@@ -138,10 +138,10 @@ static u32 estimate_sustainable_power(struct thermal_zone_device *tz)
  */
 static void estimate_pid_constants(struct thermal_zone_device *tz,
 				   u32 sustainable_power, int trip_switch_on,
-				   unsigned long control_temp, bool force)
+				   int control_temp, bool force)
 {
 	int ret;
-	unsigned long switch_on_temp;
+	int switch_on_temp;
 	u32 temperature_threshold;
 
 	ret = tz->ops->get_trip_temp(tz, trip_switch_on, &switch_on_temp);
@@ -186,8 +186,8 @@ static void estimate_pid_constants(struct thermal_zone_device *tz,
  * Return: The power budget for the next period.
  */
 static u32 pid_controller(struct thermal_zone_device *tz,
-			  unsigned long current_temp,
-			  unsigned long control_temp,
+			  int current_temp,
+			  int control_temp,
 			  u32 max_allocatable_power)
 {
 	s64 p, i, d, power_range;
@@ -206,7 +206,7 @@ static u32 pid_controller(struct thermal_zone_device *tz,
 				       true);
 	}
 
-	err = ((s32)control_temp - (s32)current_temp);
+	err = control_temp - current_temp;
 	err = int_to_frac(err);
 
 	/* Calculate the proportional term */
@@ -340,7 +340,7 @@ static void allocate_power_update_pid(struct thermal_zone_device *soc_tz,
 			u32 soc_sustainable_power)
 {
 	struct power_allocator_params *soc_params;
-	unsigned long soc_control_temp;
+	int soc_control_temp;
 	int ret;
 
 	mutex_lock(&soc_tz->lock);
@@ -395,13 +395,13 @@ static inline void soc_set_power_update_pid(struct thermal_zone_device *tz,
 }
 
 static int allocate_power(struct thermal_zone_device *tz,
-			  unsigned long current_temp,
-			  unsigned long control_temp,
-			  unsigned long switch_temp)
+			  int current_temp,
+			  int control_temp,
+			  int switch_temp)
 #else
 static int allocate_power(struct thermal_zone_device *tz,
-			  unsigned long current_temp,
-			  unsigned long control_temp)
+			  int current_temp,
+			  int control_temp)
 #endif
 {
 	struct thermal_instance *instance;
@@ -524,7 +524,7 @@ static int allocate_power(struct thermal_zone_device *tz,
 				      granted_power, total_granted_power,
 				      num_actors, power_range,
 				      max_allocatable_power, current_temp,
-				      (s32)control_temp - (s32)current_temp);
+				      control_temp - current_temp);
 
 #ifdef CONFIG_HISI_IPA_THERMAL
 	if (!tz->is_board_thermal)
@@ -639,7 +639,7 @@ static int power_allocator_bind(struct thermal_zone_device *tz)
 {
 	int ret;
 	struct power_allocator_params *params;
-	unsigned long control_temp;
+	int control_temp;
 
 	params = kzalloc(sizeof(*params), GFP_KERNEL);
 	if (!params)
@@ -714,7 +714,7 @@ static inline void soc_reset_power_pid(struct thermal_zone_device *tz)
 static int power_allocator_throttle(struct thermal_zone_device *tz, int trip)
 {
 	int ret;
-	unsigned long switch_on_temp, control_temp, current_temp;
+	int switch_on_temp, control_temp, current_temp;
 	struct power_allocator_params *params = tz->governor_data;
 
 	/*
@@ -770,7 +770,7 @@ static int power_allocator_throttle(struct thermal_zone_device *tz, int trip)
 void update_pid_value(struct thermal_zone_device *tz)
 {
 	int ret;
-	unsigned long control_temp;
+	int control_temp;
 	u32 sustainable_power = 0;
 	struct power_allocator_params *params = tz->governor_data;
 
