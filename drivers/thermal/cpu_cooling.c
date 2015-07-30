@@ -241,38 +241,32 @@ static int cpufreq_thermal_notifier(struct notifier_block *nb,
 	unsigned int freq = 0;
 #endif
 
-	switch (event) {
-
-	case CPUFREQ_ADJUST:
-		mutex_lock(&cooling_list_lock);
-		list_for_each_entry(cpufreq_dev, &cpufreq_dev_list, node) {
-			if (!cpumask_test_cpu(policy->cpu,
-					      &cpufreq_dev->allowed_cpus))
-				continue;
-
-			max_freq = cpufreq_dev->cpufreq_val;
-#ifndef CONFIG_HISI_THERMAL_SPM
-			if (policy->max != max_freq)
-				cpufreq_verify_within_limits(policy, 0,
-							     max_freq);
-#else
-			if (is_spm_mode_enabled()) {
-				actor = (enum ipa_actor)topology_physical_package_id(policy->cpu);
-				freq = get_powerhal_profile(actor);
-				cpufreq_verify_within_limits(policy, freq, freq);
-			} else {
-				if (policy->max != max_freq)
-					cpufreq_verify_within_limits(policy, 0,
-								     max_freq);
-			}
-#endif
-			break;
-		}
-		mutex_unlock(&cooling_list_lock);
-		break;
-	default:
+	if (event != CPUFREQ_ADJUST)
 		return NOTIFY_DONE;
+
+	mutex_lock(&cooling_list_lock);
+	list_for_each_entry(cpufreq_dev, &cpufreq_dev_list, node) {
+		if (!cpumask_test_cpu(policy->cpu, &cpufreq_dev->allowed_cpus))
+			continue;
+
+		max_freq = cpufreq_dev->cpufreq_val;
+
+#ifndef CONFIG_HISI_THERMAL_SPM
+		if (policy->max != max_freq)
+			cpufreq_verify_within_limits(policy, 0, max_freq);
+#else
+		if (is_spm_mode_enabled()) {
+			actor = (enum ipa_actor)topology_physical_package_id(policy->cpu);
+			freq = get_powerhal_profile(actor);
+			cpufreq_verify_within_limits(policy, freq, freq);
+		} else {
+			if (policy->max != max_freq)
+				cpufreq_verify_within_limits(policy, 0, max_freq);
+		}
+#endif
+		break;
 	}
+	mutex_unlock(&cooling_list_lock);
 
 	return NOTIFY_OK;
 }
