@@ -266,6 +266,7 @@ static int cpufreq_thermal_notifier(struct notifier_block *nb,
 								     max_freq);
 			}
 #endif
+			break;
 		}
 		mutex_unlock(&cooling_list_lock);
 		break;
