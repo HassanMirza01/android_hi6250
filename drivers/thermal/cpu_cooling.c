@@ -234,7 +234,7 @@ static int cpufreq_thermal_notifier(struct notifier_block *nb,
 				    unsigned long event, void *data)
 {
 	struct cpufreq_policy *policy = data;
-	unsigned long max_freq;
+	unsigned long clipped_freq;
 	struct cpufreq_cooling_device *cpufreq_dev;
 #ifdef CONFIG_HISI_THERMAL_SPM
 	enum ipa_actor actor;
@@ -249,19 +249,19 @@ static int cpufreq_thermal_notifier(struct notifier_block *nb,
 		if (!cpumask_test_cpu(policy->cpu, &cpufreq_dev->allowed_cpus))
 			continue;
 
-		max_freq = cpufreq_dev->clipped_freq;
+		clipped_freq = cpufreq_dev->clipped_freq;
 
 #ifndef CONFIG_HISI_THERMAL_SPM
-		if (policy->max != max_freq)
-			cpufreq_verify_within_limits(policy, 0, max_freq);
+		if (policy->max != clipped_freq)
+			cpufreq_verify_within_limits(policy, 0, clipped_freq);
 #else
 		if (is_spm_mode_enabled()) {
 			actor = (enum ipa_actor)topology_physical_package_id(policy->cpu);
 			freq = get_powerhal_profile(actor);
 			cpufreq_verify_within_limits(policy, freq, freq);
 		} else {
-			if (policy->max != max_freq)
-				cpufreq_verify_within_limits(policy, 0, max_freq);
+			if (policy->max != clipped_freq)
+				cpufreq_verify_within_limits(policy, 0, clipped_freq);
 		}
 #endif
 		break;
