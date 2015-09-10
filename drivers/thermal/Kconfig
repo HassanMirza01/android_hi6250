@@ -325,6 +325,7 @@ config ACPI_THERMAL_REL
 	depends on ACPI
 
 menu "Texas Instruments thermal drivers"
+depends on ARCH_HAS_BANDGAP || COMPILE_TEST
 source "drivers/thermal/ti-soc-thermal/Kconfig"
 endmenu
 
