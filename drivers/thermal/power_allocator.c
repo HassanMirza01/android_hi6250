@@ -179,7 +179,6 @@ static void estimate_pid_constants(struct thermal_zone_device *tz,
 /**
  * pid_controller() - PID controller
  * @tz:	thermal zone we are operating in
- * @current_temp:	the current temperature in millicelsius
  * @control_temp:	the target temperature in millicelsius
  * @max_allocatable_power:	maximum allocatable power for this thermal zone
  *
@@ -196,7 +195,6 @@ static void estimate_pid_constants(struct thermal_zone_device *tz,
  * Return: The power budget for the next period.
  */
 static u32 pid_controller(struct thermal_zone_device *tz,
-			  int current_temp,
 			  int control_temp,
 			  u32 max_allocatable_power)
 {
@@ -216,7 +214,7 @@ static u32 pid_controller(struct thermal_zone_device *tz,
 				       true);
 	}
 
-	err = control_temp - current_temp;
+	err = control_temp - tz->temperature;
 	err = int_to_frac(err);
 
 	/* Calculate the proportional term */
@@ -405,12 +403,10 @@ static inline void soc_set_power_update_pid(struct thermal_zone_device *tz,
 }
 
 static int allocate_power(struct thermal_zone_device *tz,
-			  int current_temp,
 			  int control_temp,
 			  int switch_temp)
 #else
 static int allocate_power(struct thermal_zone_device *tz,
-			  int current_temp,
 			  int control_temp)
 #endif
 {
@@ -500,8 +496,7 @@ static int allocate_power(struct thermal_zone_device *tz,
 		i++;
 	}
 
-	power_range = pid_controller(tz, current_temp, control_temp,
-				     max_allocatable_power);
+	power_range = pid_controller(tz, control_temp, max_allocatable_power);
 
 	divvy_up_power(weighted_req_power, max_power, num_actors,
 		       total_weighted_req_power, power_range, granted_power,
@@ -533,12 +528,12 @@ static int allocate_power(struct thermal_zone_device *tz,
 	trace_thermal_power_allocator(tz, req_power, total_req_power,
 				      granted_power, total_granted_power,
 				      num_actors, power_range,
-				      max_allocatable_power, current_temp,
-				      control_temp - current_temp);
+				      max_allocatable_power, tz->temperature,
+				      control_temp - tz->temperature);
 
 #ifdef CONFIG_HISI_IPA_THERMAL
 	if (!tz->is_board_thermal)
-		trace_IPA_allocator(current_temp, control_temp, switch_temp, ((s32)control_temp - (s32)current_temp),
+		trace_IPA_allocator(tz->temperature, control_temp, switch_temp, ((s32)control_temp - (s32)tz->temperature),
 							  num_actors, power_range, req_power, total_req_power,
 							  max_power, max_allocatable_power, granted_power, total_granted_power);
 #endif
@@ -724,7 +719,7 @@ static inline void soc_reset_power_pid(struct thermal_zone_device *tz)
 static int power_allocator_throttle(struct thermal_zone_device *tz, int trip)
 {
 	int ret;
-	int switch_on_temp, control_temp, current_temp;
+	int switch_on_temp, control_temp;
 	struct power_allocator_params *params = tz->governor_data;
 
 	/*
@@ -734,19 +729,13 @@ static int power_allocator_throttle(struct thermal_zone_device *tz, int trip)
 	if (trip != params->trip_max_desired_temperature)
 		return 0;
 
-	ret = thermal_zone_get_temp(tz, &current_temp);
-	if (ret) {
-		dev_warn(&tz->device, "Failed to get temperature: %d\n", ret);
-		return ret;
-	}
-
 	ret = tz->ops->get_trip_temp(tz, params->trip_switch_on,
 				     &switch_on_temp);
 
 #ifdef CONFIG_HISI_IPA_THERMAL
-	if (!ret && ((int)current_temp < 0 || current_temp < switch_on_temp)) {
+	if (!ret && ((int)tz->temperature < 0 || tz->temperature < switch_on_temp)) {
 #else
-	if (!ret && (current_temp < switch_on_temp)) {
+	if (!ret && (tz->temperature < switch_on_temp)) {
 #endif
 		tz->passive = 0;
 #ifdef CONFIG_HISI_IPA_THERMAL
@@ -770,9 +759,9 @@ static int power_allocator_throttle(struct thermal_zone_device *tz, int trip)
 	}
 
 #ifdef CONFIG_HISI_IPA_THERMAL
-	return allocate_power(tz, current_temp, control_temp, switch_on_temp);
+	return allocate_power(tz, control_temp, switch_on_temp);
 #else
-	return allocate_power(tz, current_temp, control_temp);
+	return allocate_power(tz, control_temp);
 #endif
 }
 
