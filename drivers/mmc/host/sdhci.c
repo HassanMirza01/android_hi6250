@@ -1,4 +1,17 @@
-
+/*
+ *  linux/drivers/mmc/host/sdhci.c - Secure Digital Host Controller Interface driver
+ *
+ *  Copyright (C) 2005-2008 Pierre Ossman, All Rights Reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ *
+ * Thanks to the following companies for their support:
+ *
+ *     - JMicron (hardware and technical support)
+ */
 
 #include <linux/delay.h>
 #include <linux/highmem.h>
@@ -166,6 +179,7 @@ void sdhci_dumpregs(struct sdhci_host *host)
  * Low level functions                                                       *
  *                                                                           *
 \*****************************************************************************/
+
 static void sdhci_set_card_detection(struct sdhci_host *host, bool enable)
 {
 	u32 present;
@@ -1312,9 +1326,7 @@ clock_set:
 
 	clk |= SDHCI_CLOCK_CARD_EN;
 	sdhci_writew(host, clk, SDHCI_CLOCK_CONTROL);
-/*当关闭使能sd_clk时钟，再次打开使能时，需要再等待至少8个sd_clk时钟周期，才能发起新的命令。
-400k时8个时钟周期是20微秒
-*/
+/*sd_clk 400k */
 	mdelay(1);
 }
 EXPORT_SYMBOL_GPL(sdhci_set_clock);
@@ -3323,13 +3335,13 @@ int sdhci_add_host(struct sdhci_host *host)
 		if (caps[0] & SDHCI_TIMEOUT_CLK_UNIT)
 			host->timeout_clk *= 1000;
 
+		if (override_timeout_clk)
+			host->timeout_clk = override_timeout_clk;
+
 		mmc->max_busy_timeout = host->ops->get_max_timeout_count ?
 			host->ops->get_max_timeout_count(host) : 1 << 27;
 		mmc->max_busy_timeout /= host->timeout_clk;
 	}
-
-	if (override_timeout_clk)
-		host->timeout_clk = override_timeout_clk;
 
 	mmc->caps |= MMC_CAP_SDIO_IRQ | MMC_CAP_ERASE | MMC_CAP_CMD23;
 	mmc->caps2 |= MMC_CAP2_SDIO_IRQ_NOTHREAD;
