@@ -1,4 +1,20 @@
-
+/*
+ * Intel(R) Processor Trace PMU driver for perf
+ * Copyright (c) 2013-2014, Intel Corporation.
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU General Public License,
+ * version 2, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * Intel PT is specified in the Intel Architecture Instruction Set Extensions
+ * Programming Reference:
+ * http://software.intel.com/en-us/intel-isa-extensions
+ */
 
 #undef DEBUG
 
@@ -301,7 +317,15 @@ static void topa_free(struct topa *topa)
 	free_page((unsigned long)topa);
 }
 
-
+/**
+ * topa_insert_table() - insert a ToPA table into a buffer
+ * @buf:	 PT buffer that's being extended.
+ * @topa:	 New topa table to be inserted.
+ *
+ * If it's the first table in this buffer, set up buffer's pointers
+ * accordingly; otherwise, add a END=1 link entry to @topa to the current
+ * "last" table and adjust the last table pointer to @topa.
+ */
 static void topa_insert_table(struct pt_buffer *buf, struct topa *topa)
 {
 	struct topa *last = buf->last;
@@ -609,6 +633,7 @@ static int pt_buffer_reset_markers(struct pt_buffer *buf,
 
 	/* clear STOP and INT from current entry */
 	buf->topa_index[buf->stop_pos]->stop = 0;
+	buf->topa_index[buf->stop_pos]->intr = 0;
 	buf->topa_index[buf->intr_pos]->intr = 0;
 
 	/* how many pages till the STOP marker */
@@ -633,6 +658,7 @@ static int pt_buffer_reset_markers(struct pt_buffer *buf,
 	buf->intr_pos = idx;
 
 	buf->topa_index[buf->stop_pos]->stop = 1;
+	buf->topa_index[buf->stop_pos]->intr = 1;
 	buf->topa_index[buf->intr_pos]->intr = 1;
 
 	return 0;
