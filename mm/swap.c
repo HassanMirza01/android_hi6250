@@ -667,14 +667,13 @@ static void __lru_cache_add(struct page *page)
 	struct pagevec *pvec = &get_cpu_var(lru_add_pvec);
 
 	page_cache_get(page);
-	if (!pagevec_space(pvec) || PageCompound(page))
+	if (!pagevec_add(pvec, page) || PageCompound(page))
 		__pagevec_lru_add(pvec);
 
 #ifdef CONFIG_TASK_PROTECT_LRU
 	protect_lru_set_from_process(page);
 #endif
 
-	pagevec_add(pvec, page);
 	put_cpu_var(lru_add_pvec);
 }
 
