@@ -39,6 +39,7 @@
 #include <linux/pid_namespace.h>
 #include <linux/security.h>
 #include <linux/trace_clock.h>
+
 #ifdef CONFIG_ANDROID_BINDER_IPC_32BIT
 #define BINDER_IPC_32BIT 1
 #endif
@@ -68,6 +69,7 @@ static struct binder_node *binder_context_mgr_node;
 static kuid_t binder_context_mgr_uid = INVALID_UID;
 static int binder_last_id;
 static struct workqueue_struct *binder_deferred_workqueue;
+
 #define BINDER_DEBUG_ENTRY(name) \
 static int binder_##name##_open(struct inode *inode, struct file *file) \
 { \
@@ -561,8 +563,7 @@ static size_t binder_buffer_size(struct binder_proc *proc,
 {
 	if (list_is_last(&buffer->entry, &proc->buffers))
 		return proc->buffer + proc->buffer_size - (void *)buffer->data;
-	else
-		return (size_t)list_entry(buffer->entry.next,
+	return (size_t)list_entry(buffer->entry.next,
 			  struct binder_buffer, entry) - (size_t)buffer->data;
 }
 
@@ -1130,7 +1131,7 @@ static int binder_dec_node(struct binder_node *node, int strong, int internal)
 
 
 static struct binder_ref *binder_get_ref(struct binder_proc *proc,
-					 uint32_t desc, bool need_strong_ref)
+					 u32 desc, bool need_strong_ref)
 {
 	struct rb_node *n = proc->refs_by_desc.rb_node;
 	struct binder_ref *ref;
@@ -1419,8 +1420,11 @@ static void binder_transaction_buffer_release(struct binder_proc *proc,
 		} break;
 		case BINDER_TYPE_HANDLE:
 		case BINDER_TYPE_WEAK_HANDLE: {
-			struct binder_ref *ref = binder_get_ref(proc, fp->handle,
-						fp->type == BINDER_TYPE_HANDLE);
+			struct binder_ref *ref;
+
+			ref = binder_get_ref(proc, fp->handle,
+					     fp->type == BINDER_TYPE_HANDLE);
+
 			if (ref == NULL) {
 				pr_err("transaction release %d bad handle %d\n",
 				 debug_id, fp->handle);
@@ -1516,6 +1520,7 @@ static void binder_transaction(struct binder_proc *proc,
 	} else {
 		if (tr->target.handle) {
 			struct binder_ref *ref;
+
 			ref = binder_get_ref(proc, tr->target.handle, true);
 			if (ref == NULL) {
 				binder_user_error("%d:%d got transaction to invalid handle\n",
@@ -1754,8 +1759,11 @@ static void binder_transaction(struct binder_proc *proc,
 		} break;
 		case BINDER_TYPE_HANDLE:
 		case BINDER_TYPE_WEAK_HANDLE: {
-			struct binder_ref *ref = binder_get_ref(proc, fp->handle,
-						fp->type == BINDER_TYPE_HANDLE);
+			struct binder_ref *ref;
+
+			ref = binder_get_ref(proc, fp->handle,
+					     fp->type == BINDER_TYPE_HANDLE);
+
 			if (ref == NULL) {
 				binder_user_error("%d:%d got transaction with invalid handle, %d\n",
 						proc->pid,
@@ -2104,7 +2112,8 @@ static int binder_thread_write(struct binder_proc *proc,
 			}
 			binder_debug(BINDER_DEBUG_FREE_BUFFER,
 				     "%d:%d BC_FREE_BUFFER u%016llx found buffer %d for %s transaction\n",
-				     proc->pid, thread->pid, (u64)data_ptr, buffer->debug_id,
+				     proc->pid, thread->pid, (u64)data_ptr,
+				     buffer->debug_id,
 				     buffer->transaction ? "active" : "finished");
 
 			if (buffer->transaction) {
@@ -2241,7 +2250,8 @@ static int binder_thread_write(struct binder_proc *proc,
 				if (death->cookie != cookie) {
 					binder_user_error("%d:%d BC_CLEAR_DEATH_NOTIFICATION death notification cookie mismatch %016llx != %016llx\n",
 						proc->pid, thread->pid,
-						(u64)death->cookie, (u64)cookie);
+						(u64)death->cookie,
+						(u64)cookie);
 					break;
 				}
 				ref->death = NULL;
@@ -2263,6 +2273,7 @@ static int binder_thread_write(struct binder_proc *proc,
 			struct binder_work *w;
 			binder_uintptr_t cookie;
 			struct binder_ref_death *death = NULL;
+
 			if (get_user_preempt_disabled(cookie, (binder_uintptr_t __user *)ptr))
 				return -EFAULT;
 
@@ -2277,7 +2288,8 @@ static int binder_thread_write(struct binder_proc *proc,
 			}
 			binder_debug(BINDER_DEBUG_DEAD_BINDER,
 				     "%d:%d BC_DEAD_BINDER_DONE %016llx found %pK\n",
-				     proc->pid, thread->pid, (u64)cookie, death);
+				     proc->pid, thread->pid, (u64)cookie,
+				     death);
 			if (death == NULL) {
 				binder_user_error("%d:%d BC_DEAD_BINDER_DONE %016llx not found\n",
 					proc->pid, thread->pid, (u64)cookie);
@@ -2419,12 +2431,16 @@ retry:
 		struct binder_work *w;
 		struct binder_transaction *t = NULL;
 
-		if (!list_empty(&thread->todo))
-			w = list_first_entry(&thread->todo, struct binder_work, entry);
-		else if (!list_empty(&proc->todo) && wait_for_proc_work)
-			w = list_first_entry(&proc->todo, struct binder_work, entry);
-		else {
-			if (ptr - buffer == 4 && !(thread->looper & BINDER_LOOPER_STATE_NEED_RETURN)) /* no data added */
+		if (!list_empty(&thread->todo)) {
+			w = list_first_entry(&thread->todo, struct binder_work,
+					     entry);
+		} else if (!list_empty(&proc->todo) && wait_for_proc_work) {
+			w = list_first_entry(&proc->todo, struct binder_work,
+					     entry);
+		} else {
+			/* no data added */
+			if (ptr - buffer == 4 &&
+			    !(thread->looper & BINDER_LOOPER_STATE_NEED_RETURN))
 				goto retry;
 			break;
 		}
@@ -2503,16 +2519,20 @@ retry:
 				if (!weak && !strong) {
 					binder_debug(BINDER_DEBUG_INTERNAL_REFS,
 						     "%d:%d node %d u%016llx c%016llx deleted\n",
-						     proc->pid, thread->pid, node->debug_id,
-						     (u64)node->ptr, (u64)node->cookie);
+						     proc->pid, thread->pid,
+						     node->debug_id,
+						     (u64)node->ptr,
+						     (u64)node->cookie);
 					rb_erase(&node->rb_node, &proc->nodes);
 					kfree(node);
 					binder_stats_deleted(BINDER_STAT_NODE);
 				} else {
 					binder_debug(BINDER_DEBUG_INTERNAL_REFS,
 						     "%d:%d node %d u%016llx c%016llx state unchanged\n",
-						     proc->pid, thread->pid, node->debug_id,
-						     (u64)node->ptr, (u64)node->cookie);
+						     proc->pid, thread->pid,
+						     node->debug_id,
+						     (u64)node->ptr,
+						     (u64)node->cookie);
 				}
 			}
 		} break;
@@ -3338,6 +3358,7 @@ static void binder_deferred_func(struct work_struct *work)
 	struct files_struct *files;
 
 	int defer;
+
 	do {
 		trace_binder_lock(__func__);
 		mutex_lock(&binder_main_lock);
