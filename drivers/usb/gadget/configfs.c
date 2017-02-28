@@ -322,6 +322,7 @@ static ssize_t gadget_dev_desc_UDC_store(struct gadget_info *gi,
 #ifdef CONFIG_HISI_USB_CONFIGFS
 		gadget_unlink_functions(gi);
 #endif
+		kfree(name);
 	} else {
 		if (gi->udc_name) {
 			ret = -EBUSY;
@@ -1846,6 +1847,7 @@ static struct config_group *gadgets_make(
 	gi = kzalloc(sizeof(*gi), GFP_KERNEL);
 	if (!gi)
 		return ERR_PTR(-ENOMEM);
+
 	gi->group.default_groups = gi->default_groups;
 	gi->group.default_groups[0] = &gi->functions_group;
 	gi->group.default_groups[1] = &gi->configs_group;
@@ -1896,7 +1898,6 @@ static struct config_group *gadgets_make(
 	config_group_init_type_name(&gi->group, name,
 				&gadget_root_type);
 	return &gi->group;
-
 err:
 	kfree(gi);
 	return ERR_PTR(-ENOMEM);
@@ -1963,6 +1964,5 @@ static void __exit gadget_cfs_exit(void)
 	if (!IS_ERR(android_class))
 		class_destroy(android_class);
 #endif
-
 }
 module_exit(gadget_cfs_exit);
