@@ -18,10 +18,12 @@
 #include <linux/vmalloc.h>
 #include "gcov.h"
 
-#if (__GNUC__ > 5) || (__GNUC__ == 5 && __GNUC_MINOR__ >= 1)
-#define GCOV_COUNTERS			11
+#if (__GNUC__ >= 7)
+#define GCOV_COUNTERS			9
+#elif (__GNUC__ > 5) || (__GNUC__ == 5 && __GNUC_MINOR__ >= 1)
+#define GCOV_COUNTERS			10
 #elif __GNUC__ == 4 && __GNUC_MINOR__ >= 9
-#define GCOV_COUNTERS			11
+#define GCOV_COUNTERS			9
 #else
 #define GCOV_COUNTERS			8
 #endif
@@ -83,11 +85,9 @@ struct gcov_fn_info {
  */
 struct gcov_info {
 	unsigned int version;
-	void *mod_info;
 	struct gcov_info *next;
 	unsigned int stamp;
 	const char *filename;
-	unsigned int eof_pos;
 	void (*merge[GCOV_COUNTERS])(gcov_type *, unsigned int);
 	unsigned int n_functions;
 	struct gcov_fn_info **functions;
