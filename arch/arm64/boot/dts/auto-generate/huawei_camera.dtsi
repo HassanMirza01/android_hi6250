@@ -1,0 +1,222 @@
+/*
+  Camera sensor driver dtsi setting, which are used by PUD3 products and HISI UDP
+*/
+
+ /{
+        huawei,ov8856 {
+                compatible = "huawei,ov8856";
+                huawei,sensor_name = "OV8856_SUNNY";
+                huawei,sensor_index = <1>;
+                huawei,pd_valid = <1>;
+                huawei,reset_valid = <1>;
+                huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <1>;
+                status = "disabled";
+        };
+
+        huawei,gc2355 {
+                compatible = "huawei,gc2355";
+                huawei,sensor_name = "GC2355_LITEON";
+                huawei,sensor_index = <2>;
+                huawei,pd_valid = <1>;
+                huawei,reset_valid = <1>;
+                huawei,vcmpd_valid = <0>;
+
+                hisi,is_fpga = <0>;
+                status = "disabled";
+        };
+
+	huawei,ov2680 {
+                compatible = "huawei,ov2680";
+                huawei,sensor_name = "OV2680_OFILM";
+                huawei,sensor_index = <2>;
+                huawei,pd_valid = <1>;
+                huawei,reset_valid = <1>;
+                huawei,vcmpd_valid = <0>;
+
+                hisi,is_fpga = <0>;
+                status = "disabled";
+        };
+
+        huawei,hi259 {
+                compatible = "huawei,hi259";
+                huawei,sensor_name = "HI259_VENDOR";
+                huawei,sensor_index = <2>;
+                huawei,pd_valid = <1>;
+                huawei,reset_valid = <1>;
+                huawei,vcmpd_valid = <0>;
+
+                hisi,is_fpga = <0>;
+                status = "disabled";
+        };
+
+	huawei,t4ka3 {
+		compatible = "huawei,t4ka3";
+		huawei,sensor_name = "T4KA3_LITEON";
+		huawei,sensor_index = <1>;
+		huawei,pd_valid = <1>;
+		huawei,reset_valid = <1>;
+		huawei,vcmpd_valid = <0>;
+
+		hisi,is_fpga = <0>;
+		status = "disabled";
+	};
+
+        huawei,hi843 {
+                compatible = "huawei,hi843";
+                huawei,sensor_name = "HI843_OFILM";
+                huawei,sensor_index = <1>;
+                huawei,pd_valid = <1>;
+                huawei,reset_valid = <1>;
+                huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+                status = "disabled";
+        };
+
+	huawei,hi843BLN {
+                compatible = "huawei,hi843BLN";
+                huawei,sensor_name = "HI843BLN_OFILM";
+                huawei,sensor_index = <1>;
+                huawei,pd_valid = <1>;
+                huawei,reset_valid = <1>;
+                huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+                status = "disabled";
+        };
+
+    huawei,imx219 {
+                compatible = "huawei,imx219";
+                huawei,sensor_name = "IMX219_VENDOR";
+                huawei,sensor_index = <1>;
+                huawei,pd_valid = <1>;
+                huawei,reset_valid = <1>;
+                huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+                status = "disabled";
+    };
+
+	huawei,imx219BLN {
+                compatible = "huawei,imx219BLN";
+                huawei,sensor_name = "IMX219BLN_VENDOR";
+                huawei,sensor_index = <1>;
+                huawei,pd_valid = <1>;
+                huawei,reset_valid = <1>;
+                huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+                status = "disabled";
+    };
+
+	huawei,imx214 {
+		compatible = "huawei,imx214";
+		huawei,sensor_name = "IMX214_VENDOR";
+		huawei,sensor_index = <0>;
+		huawei,pd_valid = <1>;
+		huawei,reset_valid = <1>;
+		huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <1>;
+		status = "ok";
+	};
+
+	huawei,ov13850 {
+		compatible = "huawei,ov13850";
+		huawei,sensor_name = "OV13850_VENDOR";
+		huawei,sensor_index = <0>;
+		huawei,pd_valid = <1>;
+		huawei,reset_valid = <1>;
+		huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+		status = "disabled";
+	};
+
+	huawei,ov12870 {
+		compatible = "huawei,ov12870";
+		huawei,sensor_name = "OV12870_VENDOR";
+		huawei,sensor_index = <0>;
+		huawei,pd_valid = <1>;
+		huawei,reset_valid = <1>;
+		huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+		status = "disabled";
+	};
+
+	huawei,ar1335 {
+		compatible = "huawei,ar1335";
+		huawei,sensor_name = "AR1335_SUNNY";
+		huawei,sensor_index = <0>;
+		huawei,pd_valid = <1>;
+		huawei,reset_valid = <1>;
+		huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+		status = "disabled";
+	};
+	
+    huawei,imx386 {
+        compatible = "huawei,imx386";
+        huawei,sensor_name = "IMX386_VENDOR";
+        huawei,sensor_index = <0>;
+        huawei,pd_valid = <1>;
+        huawei,reset_valid = <1>;
+        huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+		status = "disabled";
+	};
+
+	huawei,imx386E3 {
+		compatible = "huawei,imx386E3";
+		huawei,sensor_name = "IMX386E3_VENDOR";
+		huawei,sensor_index = <0>;
+		huawei,pd_valid = <1>;
+		huawei,reset_valid = <1>;
+		huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+		status = "disabled";
+	};
+
+	huawei,ov12870E3 {
+		compatible = "huawei,ov12870E3";
+		huawei,sensor_name = "OV12870E3_LITEON";
+		huawei,sensor_index = <0>;
+		huawei,pd_valid = <1>;
+		huawei,reset_valid = <1>;
+		huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+		status = "disabled";
+	};
+
+	huawei,ov12a10 {
+		compatible = "huawei,ov12a10";
+		huawei,sensor_name = "OV12A10_VENDOR";
+		huawei,sensor_index = <0>;
+		huawei,pd_valid = <1>;
+		huawei,reset_valid = <1>;
+		huawei,vcmpd_valid = <0>;
+
+		hisi,is_fpga = <0>;
+		status = "disabled";
+	};
+
+	huawei,imx486 {
+		compatible = "huawei,imx486";
+		huawei,sensor_name = "IMX486_VENDOR";
+		huawei,sensor_index = <0>;
+		huawei,pd_valid = <1>;
+		huawei,reset_valid = <1>;
+		huawei,vcmpd_valid = <0>;
+
+        hisi,is_fpga = <0>;
+		status = "disabled";
+	};
+
+};

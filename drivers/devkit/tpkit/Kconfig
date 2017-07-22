@@ -1,0 +1,23 @@
+#
+# huawei touchscreen driver configuration
+#
+
+menuconfig HUAWEI_TS_KIT
+	bool "huawei TS_KIT drivers"
+	default n
+	help
+	  If you say yes here you get support for huawei touchscreen.
+menuconfig HUAWEI_TS_KIT_TEST
+	bool "huawei TS_KIT test"
+	default n
+	help
+	  If you say yes here you get support for huawei touchscreen.
+
+source "drivers/devkit/tpkit/panel/Kconfig"
+
+#sensor unification for differ platform
+menuconfig HUAWEI_TP_KIT_COLOR_INFO
+	bool "huawei TS_KIT tp color info"
+	default n
+	help
+		get the huawei TS_KIT tp color information.

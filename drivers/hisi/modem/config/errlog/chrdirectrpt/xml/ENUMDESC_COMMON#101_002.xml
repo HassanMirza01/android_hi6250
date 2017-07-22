@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ENUMDESC>
+    <PARA name="DeviceIDType1">
+        <ENUMDEF IMEI="1" />
+        <ENUMDEF MEID="2" />
+    </PARA>
+    <PARA name="DeviceIDType2">
+        <ENUMDEF IMEI="1" />
+        <ENUMDEF MEID="2" />
+    </PARA>
+    <PARA name="ChipsetType">
+        <ENUMDEF QUALCOMM="0" desc_chn="高通平台" />
+        <ENUMDEF HISILICON="1" desc_chn="海思平台" />
+        <ENUMDEF MTK="2" desc_chn="MTK平台" />
+        <ENUMDEF INFINEON="3" desc_chn="英飞凌平台" />
+        <ENUMDEF SPREADTRUM="4" desc_chn="展讯平台" />
+    </PARA>
+    <PARA name="NetSelectMode">
+        <ENUMDEF AUTOMATIC="0" />
+        <ENUMDEF MANUAL="1" />
+    </PARA>
+    <PARA name="PreferredNetworkType">
+        <ENUMDEF WCDMA_PREF="0" />
+        <ENUMDEF GSM_ONLY="1" />
+        <ENUMDEF WCDMA_ONLY="2" />
+        <ENUMDEF GSM_UMTS="3" />
+        <ENUMDEF CDMA_EVDO="4" />
+        <ENUMDEF CDMA="5" />
+        <ENUMDEF EVDO="6" />
+        <ENUMDEF GLOBAL="7" />
+        <ENUMDEF L_C_E="8" />
+        <ENUMDEF L_G_W="9" />
+        <ENUMDEF L_C_E_G_W="10" />
+        <ENUMDEF LTE_ONLY="11" />
+        <ENUMDEF LTE_WCDMA="12" />
+        <ENUMDEF TDSCDMA_ONLY="13" />
+        <ENUMDEF TDSCDMA_WCDMA="14" />
+        <ENUMDEF TDSCDMA_LTE="15" />
+        <ENUMDEF TDSCDMA_GSM="16" />
+        <ENUMDEF T_G_L="17" />
+        <ENUMDEF T_G_W="18" />
+        <ENUMDEF T_W_L="19" />
+        <ENUMDEF T_G_W_L="20" />
+        <ENUMDEF T_C_E_G_W="21" />
+        <ENUMDEF T_L_C_E_G_W="22" />
+    </PARA>
+    <PARA name="LostNetworkType">
+        <ENUMDEF NOT_RESUME="1" />
+        <ENUMDEF RESUME="2" />
+    </PARA>
+    <PARA name="ManualRecovery">
+        <ENUMDEF AUTOMATIC="0" />
+        <ENUMDEF MANUAL="1" />
+    </PARA>
+    <PARA name="NetworkRAT">
+        <ENUMDEF UNKNOW="0" />
+        <ENUMDEF GSM_VOICE="1" />
+        <ENUMDEF GSM_GPRS="2" />
+        <ENUMDEF GSM_EDGE="3" />
+        <ENUMDEF UMTS="4" />
+        <ENUMDEF UMTS_HSPA="5" />
+        <ENUMDEF CDMA_1x="6" />
+        <ENUMDEF CDMA_EVDO="7" />
+        <ENUMDEF TD_SCDMA="8" />
+        <ENUMDEF TDS_HSPA="9" />
+        <ENUMDEF LTE="10" />
+        <ENUMDEF CDMA_EHRPD="11" />
+        <ENUMDEF DEFAULT="100" />
+    </PARA>
+    <PARA name="NetRAT_OthSlot">
+        <ENUMDEF UNKNOW="0" />
+        <ENUMDEF GSM_VOICE="1" />
+        <ENUMDEF GSM_GPRS="2" />
+        <ENUMDEF GSM_EDGE="3" />
+        <ENUMDEF UMTS="4" />
+        <ENUMDEF UMTS_HSPA="5" />
+        <ENUMDEF CDMA_1x="6" />
+        <ENUMDEF CDMA_EVDO="7" />
+        <ENUMDEF TD_SCDMA="8" />
+        <ENUMDEF TDS_HSPA="9" />
+        <ENUMDEF LTE="10" />
+        <ENUMDEF CDMA_EHRPD="11" />
+        <ENUMDEF DEFAULT="100" />
+    </PARA>
+    <PARA name="ReNetworkRAT">
+        <ENUMDEF UNKNOW="0" />
+        <ENUMDEF GSM_VOICE="1" />
+        <ENUMDEF GSM_GPRS="2" />
+        <ENUMDEF GSM_EDGE="3" />
+        <ENUMDEF UMTS="4" />
+        <ENUMDEF UMTS_HSPA="5" />
+        <ENUMDEF CDMA_1x="6" />
+        <ENUMDEF CDMA_EVDO="7" />
+        <ENUMDEF TD_SCDMA="8" />
+        <ENUMDEF TDS_HSPA="9" />
+        <ENUMDEF LTE="10" />
+        <ENUMDEF CDMA_EHRPD="11" />
+        <ENUMDEF DEFAULT="100" />
+    </PARA>
+    <PARA name="NetSelectMode">
+        <ENUMDEF AUTOMATIC="0" />
+        <ENUMDEF MANUAL="1" />
+    </PARA>
+    <PARA name="PreferredNetworkType">
+        <ENUMDEF WCDMA_PREF="0" />
+        <ENUMDEF GSM_ONLY="1" />
+        <ENUMDEF WCDMA_ONLY="2" />
+        <ENUMDEF GSM_UMTS="3" />
+        <ENUMDEF CDMA_EVDO="4" />
+        <ENUMDEF CDMA="5" />
+        <ENUMDEF EVDO="6" />
+        <ENUMDEF GLOBAL="7" />
+        <ENUMDEF L_C_E="8" />
+        <ENUMDEF L_G_W="9" />
+        <ENUMDEF L_C_E_G_W="10" />
+        <ENUMDEF LTE_ONLY="11" />
+        <ENUMDEF LTE_WCDMA="12" />
+        <ENUMDEF TDSCDMA_ONLY="13" />
+        <ENUMDEF TDSCDMA_WCDMA="14" />
+        <ENUMDEF TDSCDMA_LTE="15" />
+        <ENUMDEF TDSCDMA_GSM="16" />
+        <ENUMDEF T_G_L="17" />
+        <ENUMDEF T_G_W="18" />
+        <ENUMDEF T_W_L="19" />
+        <ENUMDEF T_G_W_L="20" />
+        <ENUMDEF T_C_E_G_W="21" />
+        <ENUMDEF T_L_C_E_G_W="22" />
+    </PARA>
+    <PARA name="LostDomain">
+        <ENUMDEF CS="0" />
+        <ENUMDEF PS="1" />
+        <ENUMDEF BOTH="2" />
+        <ENUMDEF NotFound="3" />
+    </PARA>
+    <PARA name="RecoveryDomain">
+        <ENUMDEF CS="0" />
+        <ENUMDEF PS="1" />
+        <ENUMDEF BOTH="2" />
+        <ENUMDEF NotFound="3" />
+    </PARA>
+    <PARA name="LostNetworkType">
+        <ENUMDEF NOT_RESUME="1" />
+        <ENUMDEF RESUME="2" />
+    </PARA>
+    <PARA name="ManualRecovery">
+        <ENUMDEF AUTOMATIC="0" />
+        <ENUMDEF MANUAL="1" />
+    </PARA>
+    <PARA name="SlotState">
+        <ENUMDEF NO_SIMCARD="0" />
+        <ENUMDEF MASTER_ONLY="1" />
+        <ENUMDEF SLAVE_ONLY="2" />
+        <ENUMDEF DUAL_CARD="3" />
+    </PARA>
+    <PARA name="MobileDataEanble">
+        <ENUMDEF NO="0" />
+        <ENUMDEF YES="1" />
+    </PARA>
+    <PARA name="IsCSIM">
+        <ENUMDEF NO="0" />
+        <ENUMDEF YES="1" />
+        <ENUMDEF UNKNOWN="2" />
+    </PARA>
+    <PARA name="IsUICC">
+        <ENUMDEF NO="0" />
+        <ENUMDEF YES="1" />
+        <ENUMDEF UNKNOWN="2" />
+    </PARA>
+    <PARA name="VolteEanble">
+        <ENUMDEF NO="0" />
+        <ENUMDEF YES="1" />
+    </PARA>
+    <PARA name="HwCloudOTASwitch">
+        <ENUMDEF CLOSED="2" />
+        <ENUMDEF ONLY_WIFI="1" />
+        <ENUMDEF ANY_NETWORK="0" />
+    </PARA>
+    <PARA name="ModemLogLowPowerState">
+        <ENUMDEF CLOSED="0" />
+        <ENUMDEF OPEN_AND_TEMP_DISABLE="1" />
+        <ENUMDEF OPEN_AND_ENABLE="2" />
+    </PARA>
+    <PARA name="Domain">
+        <ENUMDEF CS="0" />
+        <ENUMDEF PS="1" />
+        <ENUMDEF BOTH="2" />
+    </PARA>
+    <PARA name="MaxCampAbility">
+        <ENUMDEF UNKNOW="0" />
+        <ENUMDEF NOTCARE="1" />
+        <ENUMDEF GSM="2" />
+        <ENUMDEF CDMA="3" />
+        <ENUMDEF GSM_WCDMA="4" />
+        <ENUMDEF GSM_TDS="5" />
+        <ENUMDEF CDMA_EVDO="6" />
+        <ENUMDEF GSM_WCDMA_LTE="7" />
+        <ENUMDEF GSM_TDS_LTE="8" />
+        <ENUMDEF CDMA_EVDO_LTE="9" />
+    </PARA>
+    <PARA name="NetRejectSrvDomain">
+        <ENUMDEF CS="0" />
+        <ENUMDEF PS="1" />
+        <ENUMDEF BOTH="2" />
+        <ENUMDEF NotFound="3" />
+    </PARA>
+    <PARA name="NetRejectRatType">
+        <ENUMDEF GERAN="0" />
+        <ENUMDEF UTRAN="1" />
+        <ENUMDEF EUTRAN="2" />
+        <ENUMDEF OTHER="3" />
+        <ENUMDEF DEFAULT="100" />
+    </PARA>
+    <PARA name="SIMLostCause">
+        <ENUMDEF HOTSWAP="0" />
+        <ENUMDEF PARITY="1" />
+        <ENUMDEF TIMEOUT="2" />
+        <ENUMDEF RX_BREAK="6" />
+        <ENUMDEF OVERRUN="7" />
+        <ENUMDEF NO_ATR_RECEIVE="8" />
+        <ENUMDEF VOLTAGE_MISMATCH="9" />
+        <ENUMDEF TECHNICAL_PROBLEM="10" />
+        <ENUMDEF POLL_ERROR="11" />
+        <ENUMDEF PPS_TIMED_OUT="12" />
+        <ENUMDEF PERSO_SIMLOCK="13" />
+        <ENUMDEF NO_ATR_RECEIVE_AIR="14" />
+        <ENUMDEF CORRUPT_ATR_RCVD="15" />
+        <ENUMDEF BAD_STATUS_WORD="16" />
+        <ENUMDEF LDO_OCP="80" />
+        <ENUMDEF CARD_NO_POWER="81" />
+        <ENUMDEF CARD_TYPE_ERROR="82" />
+        <ENUMDEF ME_CARD_MAYBE_MISMATCH="83" />
+        <ENUMDEF CARD_LOCKED="84" />
+        <ENUMDEF CARD_TRAY_OUT="85" />
+        <ENUMDEF NAS_GET_SIM_FAIL="100" />
+        <ENUMDEF UNKNOW="126" />
+    </PARA>
+    <PARA name="SIMCardType">
+        <ENUMDEF GSMCARD="0" />
+        <ENUMDEF RUIM="1" />
+        <ENUMDEF USIM="2" />
+    </PARA>
+    <PARA name="DropCallType">
+        <ENUMDEF MO_CALL="0" />
+        <ENUMDEF DROP_CALL="1" />
+        <ENUMDEF MT_CALL="2" />
+        <ENUMDEF HANGUP_ERROR="3" />
+        <ENUMDEF REPORT_FAILED_CALL="4" />
+    </PARA>
+    <PARA name="RecoveryAction">
+        <ENUMDEF GET_DATA_CALL_LIST="0" />
+        <ENUMDEF CLEANUP="1" />
+        <ENUMDEF REREGISTER="2" />
+        <ENUMDEF RADIO_RESTART="3" />
+        <ENUMDEF RADIO_RESTART_WITH_PROP="4" />
+        <ENUMDEF MODEM_RESTART="5" />
+        <ENUMDEF DEFAULT="100" />
+    </PARA>
+    <PARA name="ApnType">
+        <ENUMDEF default="0" />
+        <ENUMDEF mms="1" />
+        <ENUMDEF cbs="2" />
+        <ENUMDEF dun="3" />
+        <ENUMDEF hipri="4" />
+        <ENUMDEF supl="5" />
+        <ENUMDEF fota="6" />
+        <ENUMDEF ims="7" />
+        <ENUMDEF ia="8" />
+        <ENUMDEF bip0="9" />
+        <ENUMDEF bip1="10" />
+        <ENUMDEF bip2="11" />
+        <ENUMDEF bip3="12" />
+        <ENUMDEF bip4="13" />
+        <ENUMDEF bip5="14" />
+        <ENUMDEF bip6="15" />
+    </PARA>
+    <PARA name="ApduIns">
+        <ENUMDEF NULL="0" />
+        <ENUMDEF A4="1" />
+        <ENUMDEF DC="2" />
+    </PARA>
+    <PARA name="CallState">
+        <ENUMDEF NO_CALL="0" />
+        <ENUMDEF CARD_ONE_IN_CALL="1" />
+        <ENUMDEF CARD_TWO_IN_CALL="2" />
+        <ENUMDEF BOTH_CARD_IN_CALL="3" />
+    </PARA>
+    <PARA name="Domain">
+        <ENUMDEF CS="0" />
+        <ENUMDEF PS="1" />
+        <ENUMDEF BOTH="2" />
+    </PARA>
+    <PARA name="VoiceDirection">
+        <ENUMDEF UP_LINK="0" />
+        <ENUMDEF DOWN_LINK="1" />
+        <ENUMDEF DUAL_LINK="2" />
+    </PARA>
+    <PARA name="VoiceCode">
+        <ENUMDEF FRAME_MODE_AMR="0" />
+        <ENUMDEF FRAME_MODE_EFR="1" />
+        <ENUMDEF FRAME_MODE_FR="2" />
+        <ENUMDEF FRAME_MODE_IS127="3" />
+        <ENUMDEF FRAME_MODE_4GV_NB="4" />
+    </PARA>
+    <PARA name="CallMode">
+        <ENUMDEF HEADSET="0" />
+        <ENUMDEF HEADPHONES="1" />
+        <ENUMDEF SPEAKER="2" />
+        <ENUMDEF BLUETOOTH="3" />
+    </PARA>
+    <PARA name="PAType">
+        <ENUMDEF CDMA="0" />
+        <ENUMDEF GSM="1" />
+        <ENUMDEF WCDMA="2" />
+        <ENUMDEF LTE="3" />
+        <ENUMDEF TDSCDMA="4" />
+    </PARA>
+    <PARA name="NetworkType">
+        <ENUMDEF GSM="0" />
+        <ENUMDEF CDMA="1" />
+    </PARA>
+    <PARA name="EventId" length="1">
+        <ENUMDEF TDS_OOS_INFO_REPORT_FAULTID="0" />
+        <ENUMDEF TRRC_STATISTIC_INFO_COLLECTION_EVENTID="64" />
+        <ENUMDEF LRRC_STATISTIC1_INFO_COLLECTION_EVENTID="65" />
+        <ENUMDEF LRRC_STATISTIC2_INFO_COLLECTION_EVENTID="66" />
+        <ENUMDEF TMAC_STATISTIC_INFO_COLLECTION_EVENTID="76" />
+        <ENUMDEF LL2_STATISTIC_INFO_COLLECTION_EVENTID="77" />
+        <ENUMDEF LNAS_STATISTIC_INFO_COLLECTION_EVENTID="79" />
+        <ENUMDEF COMM_ERRORLOG_EVENTID_TYPE_BUTT="80" />
+    </PARA>
+    <PARA name="EventScenario" length="2">
+        <ENUMDEF TRRC_OUT_OF_SYNC_CELL_UPDATE_INFO_STRU_ALARMID="24001" />
+        <ENUMDEF TRRC_OOS_INFO_STRU_ALARMID="24002" />
+        <ENUMDEF TRRC_ERRORLOG_ALARMID_BUTT="24003" />
+        <ENUMDEF TLL2_OOS_INFO_STRU_ALARMID="25001" />
+        <ENUMDEF LMAC_OM_PREAMBLE_SPEC_NOT_MATCH_INFO_STRU_ALARMID="25002" />
+        <ENUMDEF TLL2_ERRORLOG_ALARMID_BUTT="25003" />
+    </PARA>
+    <PARA name="PS_BOOL_ENUM" length="1">
+        <ENUMDEF PS_FALSE="0" />
+        <ENUMDEF PS_TRUE="1" />
+        <ENUMDEF PS_BOOL_BUTT="2" />
+    </PARA>
+    <PARA name="TLL2_LMAC_PREAMBLE_SPEC_NOT_MATCH_RESULT_ENUM" length="1">
+        <ENUMDEF PREAMBLE_CONSECUTIVE_LESS1_AND_RA_FAIL="0" />
+        <ENUMDEF PREAMBLE_CONSECUTIVE_LESS1_AND_RA_SUCC="1" />
+        <ENUMDEF PREAMBLE_SPEC_NOT_MATCH_BUTT="2" />
+    </PARA>
+    <PARA name="PS_BOOL_ENUM" length="1">
+        <ENUMDEF PS_FALSE="0" />
+        <ENUMDEF PS_TRUE="1" />
+        <ENUMDEF PS_BOOL_BUTT="2" />
+    </PARA>
+    <PARA name="SubEventId" length="2">
+        <ENUMDEF LMAC_OM_PRACH_CONFIG_STRU="16" />
+        <ENUMDEF LMAC_OM_PREAMBLE_SPEC_NOT_MATCH_INFO_STRU_SUBEVENT="8" />
+        <ENUMDEF LRRC_OM_SCELL_ID="14" />
+        <ENUMDEF LRRC_OM_TAC_STRU="15" />
+        <ENUMDEF TLL2_LMAC_PREAMBLE_SPEC_NOT_MATCH_LOG_STRU="13" />
+        <ENUMDEF TLL2_OOS_INFO_STRU_SUBEVENT="6" />
+        <ENUMDEF TRRC_OOS_INFO_STRU_SUBEVENT="5" />
+        <ENUMDEF TRRC_OUT_OF_SYNC_CELL_UPDATE_INFO_STRU_SUBEVENT="7" />
+    </PARA>
+</ENUMDESC>

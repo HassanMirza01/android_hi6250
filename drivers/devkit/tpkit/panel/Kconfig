@@ -1,0 +1,10 @@
+#
+# huawei touchscreen driver configuration
+#
+
+
+source "drivers/devkit/tpkit/panel/focaltech/Kconfig"
+source "drivers/devkit/tpkit/panel/synaptics/Kconfig"
+source "drivers/devkit/tpkit/panel/parade/Kconfig"
+source "drivers/devkit/tpkit/panel/novatek/Kconfig"
+source "drivers/devkit/tpkit/panel/ilitek/Kconfig"

@@ -1,0 +1,1 @@
+obj-$(CONFIG_LCD_ON_OFF_CHECK) += lcd_on_off_check.o

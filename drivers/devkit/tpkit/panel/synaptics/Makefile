@@ -1,0 +1,9 @@
+obj-$(CONFIG_SYNAPTICS_TS_KIT) += synaptics.o
+obj-$(CONFIG_SYNAPTICS_TS_KIT) += synaptics_fw_update.o
+obj-$(CONFIG_SYNAPTICS_TS_KIT) += synaptics_fw_s3718_update.o
+obj-$(CONFIG_SYNAPTICS_TS_KIT) += synaptics_fw_debug.o
+obj-$(CONFIG_SYNAPTICS_TS_KIT) += synaptics_dsx_test_reporting.o
+obj-$(CONFIG_SYNAPTICS_TS_KIT) += synaptics_debug.o
+EXTRA_CFLAGS += -Iarch/arm/mach-hisi
+EXTRA_CFLAGS += -Idrivers/hisi/tzdriver
+EXTRA_CFLAGS += -Idrivers/tzdriver

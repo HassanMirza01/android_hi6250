@@ -1,0 +1,6 @@
+config HUAWEI_CHARGER_SENSORHUB
+	bool "huawei charger sensorhub"
+	default n
+config BQ25892_CHARGER_SENSORHUB
+	bool "bq25892 charger sensorhub"
+	default n

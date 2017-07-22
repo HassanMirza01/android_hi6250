@@ -1,0 +1,1 @@
+obj-$(CONFIG_BQ25892_CHARGER_SENSORHUB) += bq25892_charger_sh.o

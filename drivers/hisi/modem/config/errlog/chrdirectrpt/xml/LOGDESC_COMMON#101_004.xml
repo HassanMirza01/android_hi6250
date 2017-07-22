@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<LOGFMTDEF type="ANDROID HANDSET" ProductName="COMMON#101" LogVersion="004" CHRVersion="3.1">
+    <FILEHEAD>
+        <PARA name="ProductName" length="20" type="varchar" desc="产品名称" oversea="true" />
+        <PARA name="LogVersion" length="1" type="int" desc="日志版本号" oversea="true" />
+        <PARA name="SoftwareVersion" length="50" type="varchar" desc="手机软件版本号" oversea="true" />
+        <PARA name="ChipsetType" length="1" type="enum" desc="芯片平台类型" oversea="true" />
+        <PARA name="Year" length="2" type="int" desc="文件生成时的年" oversea="true" />
+        <PARA name="Month" length="1" type="int" desc="文件生成时的月" oversea="true" />
+        <PARA name="Day" length="1" type="int" desc="文件生成时的日" oversea="true" />
+        <PARA name="Hour" length="1" type="int" desc="文件生成时的时" oversea="true" />
+        <PARA name="Minute" length="1" type="int" desc="文件生成时的分" oversea="true" />
+        <PARA name="Second" length="1" type="int" desc="文件生成时的秒" oversea="true" />
+        <PARA name="Checksum" length="2" type="int" desc="CRC校验和。目前不使用，固定填0" oversea="true" />
+        <PARA name="noExplain" length="100" type="varchar" desc="产品自用，后台不解析，固定填0，用于后续扩展的需要。" oversea="true" />
+    </FILEHEAD>
+    <COMHEAD>
+        <PARA name="DeviceIDType1" length="1" type="enum" desc="卡1对应的手机标识类型" oversea="true" />
+        <PARA name="IMEIorMEID1" length="44" type="varchar" desc="卡1手机标识" oversea="true" />
+        <PARA name="DeviceIDType2" length="1" type="enum" desc="卡2对应的手机标识类型" oversea="true" />
+        <PARA name="IMEIorMEID2" length="44" type="varchar" desc="卡1手机标识" oversea="true" />
+        <PARA name="SerialNum" length="44" type="varchar" desc="手机序列号" oversea="true" />
+    </COMHEAD>
+    <COMMONPARA name="CommonBasePara">
+        <PARA name="EventId" length="1" type="enum" desc="事件ID，一级统计字段" oversea="true" />
+        <PARA name="Len" length="2" type="int" desc=" 标识本条日志长度" oversea="true" />
+        <PARA name="TimeStamp" length="6" type="dtime" desc="时间戳" oversea="true" />
+        <PARA name="TimeZoneStr" length="40" type="varchar" desc="文件生成时的时区" oversea="true" />
+        <PARA name="CardIndex" length="1" type="int" desc="卡索引" oversea="true" />
+        <PARA name="HardwareVersion" length="50" type="varchar" desc="手机硬件版本号" oversea="true" />
+        <PARA name="RecordNo" length="4" type="uint" desc="CHR序列号" oversea="true" />
+    </COMMONPARA>
+    <COMMONPARA name="CommonPara" parent="CommonBasePara">
+        <!-- 公共信息-二级统计字段-->
+        <PARA name="EventScenario" length="1" type="enum" desc="事件场景，二级统计字段" oversea="true" />
+        <!-- 公共信息-三级原因值-->
+        <PARA name="EventFailCause" length="4" type="int" desc="模块异常，三级原因值" oversea="true" />
+        <!-- 公共信息-信号-->
+        <PARA name="NetworkRAT" length="1" type="enum" desc="掉网时所在网络制式" oversea="true" />
+        <PARA name="NetRAT_OthSlot" length="1" type="enum" desc="另一张卡所在网络制式" oversea="true" />
+        <PARA name="SignalStrength" length="2" type="int" desc="信号强度" oversea="true" />
+        <PARA name="SignalQuality" length="2" type="int" desc="信号质量" oversea="true" />
+        <PARA name="EnBand" length="2" type="int" desc="频段公共信息" oversea="true" />
+        <!-- 公共信息-位置信息-->
+        <PARA name="LAC" length="4" type="int" desc="G/U/TD/L CS位置区信息" oversea="true" />
+        <PARA name="RAC" length="4" type="int" desc="G/U/TD PS路由区信息" oversea="true" />
+        <PARA name="CellID" length="4" type="uint" desc="G/U/TD/L 小区ID" oversea="true" />
+        <PARA name="BaseID" length="4" type="int" desc="CDMA上报BASE_ID" oversea="true" />
+        <PARA name="SID" length="2" type="int" desc="CDMA上报SID" oversea="true" />
+        <PARA name="NID" length="2" type="int" desc="CDMA上报NID" oversea="true" />
+        <!-- 公共信息-网络信息-->
+        <PARA name="MCC" length="3" type="varchar" desc="MCC" oversea="true" />
+        <PARA name="MNC" length="3" type="varchar" desc="MNC" oversea="true" />
+        <PARA name="SimOperator" length="6" type="varchar" desc="卡HPLMN" oversea="true" />
+        <PARA name="UlChannel" length="4" type="int" desc="下行频点" oversea="true" />
+        <PARA name="DlChannel" length="4" type="int" desc="上行频点" oversea="true" />
+        <PARA name="MCC_OtherSlot" length="3" type="varchar" desc="另一张卡注册网络的MCC" oversea="true" />
+        <PARA name="MNC_OtherSlot" length="3" type="varchar" desc="另一张卡注册网络的MNC" oversea="true" />
+        <PARA name="SimOper_OtherSlot" length="6" type="varchar" desc="另一张卡的卡HPLMN" oversea="true" />
+        <!-- 公共信息-手机状态-->
+        <PARA name="SlotState" length="1" type="enum" desc="卡槽插卡状态" oversea="true" />
+        <PARA name="ScreenState" length="1" type="int" desc="屏幕状态-ON:1;OFF:0" oversea="true" />
+        <PARA name="Orientation" length="1" type="varchar" desc="横竖屏" oversea="true" />
+        <PARA name="isVsimOpen" length="1" type="int" desc="天际通功能是否打开" oversea="true" />
+        <PARA name="PreferredNetworkType" length="1" type="enum" desc="首选网络类型" oversea="true" />
+        <PARA name="MobileDataEanble" length="1" type="enum" desc="数据开关是否打开" oversea="true" />
+        <PARA name="VolteEanble" length="1" type="enum" desc="Volte开关是否打开" oversea="true" />
+        <!-- 公共信息-WIFI位置-->
+        <PARA name="IsWiFiOpen" length="3" type="varchar" desc="wifi开关" oversea="true" />
+        <PARA name="BSSID_CONNECTED" length="17" type="varchar" desc="Basic Service Set ID，WIFI" />
+        <PARA name="BSSID_SCAN1" length="17" type="varchar" desc="Basic Service Set ID，WIFI" />
+        <PARA name="BSSID_SCAN2" length="17" type="varchar" desc="Basic Service Set ID，WIFI" />
+        <PARA name="BSSID_SCAN3" length="17" type="varchar" desc="Basic Service Set ID，WIFI" />
+        <!-- 公共信息-ModemLog信息-->
+        <PARA name="NeedModemLog" length="1" type="varchar" desc="是否需要保存modem log" />
+        <PARA name="IsModemLogOpen" length="1" type="varchar" desc="modem LOG总开关是否开启" />
+        <PARA name="IsViaModemLogOpen" length="1" type="varchar" desc="VIA平台ModemLog是否开启" />
+        <PARA name="ModemLogSize" length="4" type="int" desc="Modem Log大小" />
+        <PARA name="ModemLogCatchResult" length="4" type="int" desc="HISI 平台与Beta俱乐部的通信状态" />
+        <PARA name="ModemLogLowPowerState" length="1" type="enum" desc="ModemLog的状态（低功耗方案是否开启、如果是海思平台还包括开启延迟写入超时时间是20ms还是10分钟）" />
+        <PARA name="ModemLogConfig" length="1" type="enum" desc="ModemLog配置状态" />
+        <!-- 公共信息-云通信相关信息-->
+        <PARA name="HwCloudOTASwitch" length="1" type="enum" desc="云通信开关是否打开" oversea="true" />
+        <!-- 公共信息-卡相关信息-->
+        <PARA name="IsCSIM" length="1" type="enum" desc="是否是CSIM卡" oversea="true" />
+        <PARA name="IsUICC" length="1" type="enum" desc="是否是UICC卡" oversea="true" />
+        <PARA name="CSimOperator" length="6" type="varchar" desc="CSIM卡HPLMN" oversea="true" />
+    </COMMONPARA>
+    <EVENT name="LL2_STATISTIC_INFO_COLLECTION" EventId="LL2_STATISTIC_INFO_COLLECTION_EVENTID" parent="CommonPara">
+        <PARA name="LMAC_OM_PREAMBLE_SPEC_NOT_MATCH_INFO_STRU_SUBEVENT" desc="stLMAC_OM_PREAMBLE_SPEC_NOT_MATCH_INFO_STRU" length="2" type="class" />
+    </EVENT>
+    <EVENT name="LRRC_VOLTE_FAULT_AUTOAN_IND" EventId="LRRC_VOLTE_FAULT_AUTOAN_IND_EVENTID" parent="CommonPara">
+        <PARA name="LPS_OM_VOLTE_FAULT_AUTOAN_INFO_STRU_SUBEVENT" desc="stLPS_OM_VOLTE_FAULT_AUTOAN_INFO_STRU" length="2" type="class" />
+    </EVENT>
+    <EVENT name="TDS_OOS_INFO_REPORT" EventId="TDS_OOS_INFO_REPORT_FAULTID" parent="CommonPara">
+        <PARA name="TRRC_OOS_INFO_STRU_SUBEVENT" desc="stTRRC_OOS_INFO_STRU" length="2" type="class" />
+        <PARA name="TLL2_OOS_INFO_STRU_SUBEVENT" desc="stTLL2_OOS_INFO_STRU" length="2" type="class" />
+    </EVENT>
+    <EVENT name="TRRC_STATISTIC_INFO_COLLECTION" EventId="TRRC_STATISTIC_INFO_COLLECTION_EVENTID" parent="CommonPara">
+        <PARA name="TRRC_OUT_OF_SYNC_CELL_UPDATE_INFO_STRU_SUBEVENT" desc="stTRRC_OUT_OF_SYNC_CELL_UPDATE_INFO_STRU" length="2" type="class" />
+        <PARA name="TRRC_APP_COLLECT_TDS_FREQ_REPORT_STRU_SUBEVENT" desc="stTRRC_APP_COLLECT_TDS_FREQ_REPORT_STRU" length="2" type="class" />
+    </EVENT>
+    <SUBPARA name="LL2_OM_VOLTE_STAT_INFO_STRU">
+        <PARA name="SubEventId" desc="LL2_OM_VOLTE_STAT_INFO_STRU" length="2" type="enum" />
+        <PARA name="ulMsTimeStamp" desc="ulMsTimeStamp" length="4" type="uint" />
+        <PARA name="LL2_OM_VOLTE_AUTOAN_EVENT_ENUM" desc="ucEvent" length="1" type="enum" />
+        <PARA name="ucRtpPktCnt" desc="ucRtpPktCnt" length="1" type="uint" />
+        <PARA name="ucRtpLossPktCnt" desc="ucRtpLossPktCnt" length="1" type="uint" />
+        <PARA name="ucRohcDecompFailCnt" desc="ucRohcDecompFailCnt" length="1" type="uint" />
+        <PARA name="usTotalMACTb" desc="usTotalMACTb" length="2" type="uint" />
+        <PARA name="usCrcErrMACTb" desc="usCrcErrMACTb" length="2" type="uint" />
+        <PARA name="usRtpJitter" desc="usRtpJitter" length="2" type="uint" />
+        <PARA name="usRsv0" desc="usRsv0" length="2" type="uint" />
+        <PARA name="ulPdcpSendIpPktCnt" desc="ulPdcpSendIpPktCnt" length="4" type="uint" />
+        <PARA name="ucSilenceFrameCnt" desc="ucSilenceFrameCnt" length="1" type="uint" />
+        <PARA name="ucRsv" desc="ucRsv" length="1" type="uint" />
+        <PARA name="usRsv" desc="usRsv" length="2" type="uint" />
+    </SUBPARA>
+    <SUBPARA name="LMAC_OM_PRACH_CONFIG_STRU">
+        <PARA name="SubEventId" desc="LMAC_OM_PRACH_CONFIG_STRU" length="2" type="enum" />
+        <PARA name="ucPrachConfigIndex" desc="ucPrachConfigIndex" length="1" type="uint" />
+        <PARA name="ucPrachFormat" desc="ucPrachFormat" length="1" type="uint" />
+        <PARA name="ucHighSpeedFlag" desc="ucHighSpeedFlag" length="1" type="uint" />
+        <PARA name="ucZeroCorrelationZoneConfig" desc="ucZeroCorrelationZoneConfig" length="1" type="uint" />
+    </SUBPARA>
+    <SUBPARA name="LMAC_OM_PREAMBLE_SPEC_NOT_MATCH_INFO_STRU_SUBEVENT">
+        <PARA name="SubEventId" desc="LMAC_OM_PREAMBLE_SPEC_NOT_MATCH_INFO_STRU_SUBEVENT" length="2" type="enum" />
+        <PARA name="ucRecordNum" desc="ucRecordNum" length="1" type="uint" />
+        <PARA name="aucRsv" desc="aucRsv" length="3" type="array" />
+        <PARA name="TLL2_LMAC_PREAMBLE_SPEC_NOT_MATCH_LOG_STRU" desc="astPblSpecNotMatchLog" length="2" type="classArray" arraysize="8" />
+    </SUBPARA>
+    <SUBPARA name="LPS_LOW_QUILITY_ABNORMAL_STRU">
+        <PARA name="SubEventId" desc="LPS_LOW_QUILITY_ABNORMAL_STRU" length="2" type="enum" />
+        <PARA name="enMod3EqualCell" desc="enMod3EqualCell" length="1" type="uint" />
+        <PARA name="enNoIntraFreqHo" desc="enNoIntraFreqHo" length="1" type="uint" />
+        <PARA name="enNoInterFreqHo" desc="enNoInterFreqHo" length="1" type="uint" />
+        <PARA name="enNoInterRATHo" desc="enNoInterRATHo" length="1" type="uint" />
+        <PARA name="enNoNcellMeasRpt" desc="enNoNcellMeasRpt" length="1" type="uint" />
+        <PARA name="enNoNcellMeasCfg" desc="enNoNcellMeasCfg" length="1" type="uint" />
+        <PARA name="enMeasRptTryFail" desc="enMeasRptTryFail" length="1" type="uint" />
+        <PARA name="enUnknowInt" desc="enUnknowInt" length="1" type="uint" />
+        <PARA name="enRsv0" desc="enRsv0" length="1" type="uint" />
+        <PARA name="enRsv1" desc="enRsv1" length="1" type="uint" />
+        <PARA name="enRsv2" desc="enRsv2" length="1" type="uint" />
+        <PARA name="enRsv3" desc="enRsv3" length="1" type="uint" />
+    </SUBPARA>
+    <SUBPARA name="LPS_OM_VOLTE_FAULT_AUTOAN_INFO_STRU_SUBEVENT">
+        <PARA name="SubEventId" desc="LPS_OM_VOLTE_FAULT_AUTOAN_INFO_STRU_SUBEVENT" length="2" type="enum" />
+        <PARA name="ulMcc" desc="ulMcc" length="4" type="uint" />
+        <PARA name="ulMnc" desc="ulMnc" length="4" type="uint" />
+        <PARA name="ulGci" desc="ulGci" length="4" type="uint" />
+        <PARA name="LRRC_OM_TAC_STRU" desc="stTac" length="2" type="class" />
+        <PARA name="LRRC_LPDCP_VOLTE_FAULT_TRIG_ENUM" desc="enTrigSrc" length="1" type="enum" />
+        <PARA name="ucRsv" desc="ucRsv" length="1" type="uint" />
+        <PARA name="LPS_OM_VOLTE_FAULT_CAUSE_ENUM" desc="enFaultCause" length="2" type="enum" />
+        <PARA name="LPS_LOW_QUILITY_ABNORMAL_STRU" desc="stLowQuiltyCause" length="2" type="class" />
+        <PARA name="enGoodSigRlError" desc="enGoodSigRlError" length="1" type="uint" />
+        <PARA name="enGoodSigOutofSync" desc="enGoodSigOutofSync" length="1" type="uint" />
+        <PARA name="enGoodSigBler" desc="enGoodSigBler" length="1" type="uint" />
+        <PARA name="enNotMaxTxPwrRl" desc="enNotMaxTxPwrRl" length="1" type="uint" />
+        <PARA name="enSrvccFail" desc="enSrvccFail" length="1" type="uint" />
+        <PARA name="enSrvccDelayAbnormal" desc="enSrvccDelayAbnormal" length="1" type="uint" />
+        <PARA name="enSrvccSucc" desc="enSrvccSucc" length="1" type="uint" />
+        <PARA name="enAirMsgCheckFail" desc="enAirMsgCheckFail" length="1" type="uint" />
+        <PARA name="enInteVeriFail" desc="enInteVeriFail" length="1" type="uint" />
+        <PARA name="enIntraHoFail" desc="enIntraHoFail" length="1" type="uint" />
+        <PARA name="enIntraHoSucc" desc="enIntraHoSucc" length="1" type="uint" />
+        <PARA name="enReestHappen" desc="enReestHappen" length="1" type="uint" />
+        <PARA name="enOutOfSync" desc="enOutOfSync" length="1" type="uint" />
+        <PARA name="enNotReasonableHoInd" desc="enNotReasonableHoInd" length="1" type="uint" />
+        <PARA name="enLowQuilBeforeHo" desc="enLowQuilBeforeHo" length="1" type="uint" />
+        <PARA name="enLowQuilBeforeSrvcc" desc="enLowQuilBeforeSrvcc" length="1" type="uint" />
+        <PARA name="enLowQuilty" desc="enLowQuilty" length="1" type="uint" />
+        <PARA name="LRRC_OM_REEST_TRIG_ENUM" desc="enReesTrig" length="1" type="enum" />
+        <PARA name="enFastFading" desc="enFastFading" length="1" type="uint" />
+        <PARA name="enRsv1" desc="enRsv1" length="1" type="uint" />
+        <PARA name="LL2_OM_VOLTE_AUTOAN_EVENT_ENUM" desc="enL2FaultEvent" length="1" type="enum" />
+        <PARA name="enDecipherFail" desc="enDecipherFail" length="1" type="uint" />
+        <PARA name="enRohcFail" desc="enRohcFail" length="1" type="uint" />
+        <PARA name="enRtpPktLostPdcpNoLost" desc="enRtpPktLostPdcpNoLost" length="1" type="uint" />
+        <PARA name="usRtpConPktLostnum" desc="usRtpConPktLostnum" length="4" type="uint" />
+        <PARA name="usRtpPktTotalLostnum" desc="usRtpPktTotalLostnum" length="4" type="uint" />
+        <PARA name="enJitterFlg" desc="enJitterFlg" length="1" type="uint" />
+        <PARA name="enJitterOrPktLostReachThre" desc="enJitterOrPktLostReachThre" length="1" type="uint" />
+        <PARA name="usJitterTime" desc="usJitterTime" length="2" type="uint" />
+        <PARA name="enRsv2" desc="enRsv2" length="1" type="uint" />
+        <PARA name="enRsv3" desc="enRsv3" length="1" type="uint" />
+        <PARA name="enRsv4" desc="enRsv4" length="1" type="uint" />
+        <PARA name="enRsv5" desc="enRsv5" length="1" type="uint" />
+        <PARA name="ulSigDbNum" desc="ulSigDbNum" length="4" type="uint" />
+        <PARA name="LRRC_OM_AIR_SIGNAL_INFO_STRU" desc="astAirSigDb" length="2" type="classArray" arraysize="20" />
+        <PARA name="ulEvtNum" desc="ulEvtNum" length="4" type="uint" />
+        <PARA name="LRRC_OM_LAYER_EVENT_INFO_STRU" desc="astLayerEventDb" length="2" type="classArray" arraysize="56" />
+        <PARA name="ulMeasRptNum" desc="ulMeasRptNum" length="4" type="uint" />
+        <PARA name="LRRC_OM_MEASRPT_INFO" desc="astMeasRptDb" length="2" type="classArray" arraysize="16" />
+        <PARA name="usFaultIndex" desc="usFaultIndex" length="2" type="uint" />
+        <PARA name="usValidPktRptNum" desc="usValidPktRptNum" length="2" type="uint" />
+        <PARA name="LL2_OM_VOLTE_STAT_INFO_STRU" desc="astLL2PktOmDb" length="2" type="classArray" arraysize="6" />
+    </SUBPARA>
+    <SUBPARA name="LRRC_OM_AIR_SIGNAL_INFO_STRU">
+        <PARA name="SubEventId" desc="LRRC_OM_AIR_SIGNAL_INFO_STRU" length="2" type="enum" />
+        <PARA name="usCellId" desc="usCellId" length="2" type="uint" />
+        <PARA name="usDLEarfcn" desc="usDLEarfcn" length="2" type="uint" />
+        <PARA name="sRsrp" desc="sRsrp" length="2" type="int" />
+        <PARA name="sRsrq" desc="sRsrq" length="2" type="int" />
+        <PARA name="usStrongestIntraCell" desc="usStrongestIntraCell" length="2" type="uint" />
+        <PARA name="sStrongestIntrRsrp" desc="sStrongestIntrRsrp" length="2" type="int" />
+        <PARA name="usMod3EualIntraCell" desc="usMod3EualIntraCell" length="2" type="uint" />
+        <PARA name="sMod3EualIntraRsrp" desc="sMod3EualIntraRsrp" length="2" type="int" />
+        <PARA name="ulTimeStamp" desc="ulTimeStamp" length="4" type="uint" />
+        <PARA name="sPusPwr" desc="sPusPwr" length="1" type="int" />
+        <PARA name="ucBler" desc="ucBler" length="1" type="uint" />
+        <PARA name="ucMeasLevel" desc="ucMeasLevel" length="1" type="uint" />
+        <PARA name="sSnr" desc="sSnr" length="1" type="int" />
+        <PARA name="LPS_OM_SENSOR_STAT_ENUM" desc="enSensorState" length="1" type="enum" />
+        <PARA name="sResv" desc="sResv" length="1" type="int" />
+        <PARA name="usResv" desc="usResv" length="2" type="uint" />
+    </SUBPARA>
+    <SUBPARA name="LRRC_OM_LAYER_EVENT_INFO_STRU">
+        <PARA name="SubEventId" desc="LRRC_OM_LAYER_EVENT_INFO_STRU" length="2" type="enum" />
+        <PARA name="OM_PS_KEY_EVENT_ENUM" desc="usEvent" length="2" type="enum" />
+        <PARA name="usRsv" desc="usRsv" length="2" type="uint" />
+        <PARA name="ulTimeStamp" desc="ulTimeStamp" length="4" type="uint" />
+    </SUBPARA>
+    <SUBPARA name="LRRC_OM_MEASRPT_INFO">
+        <PARA name="SubEventId" desc="LRRC_OM_MEASRPT_INFO" length="2" type="enum" />
+        <PARA name="ulTimeStamp" desc="ulTimeStamp" length="4" type="uint" />
+        <PARA name="usSrvingCellId" desc="usSrvingCellId" length="2" type="uint" />
+        <PARA name="usSrvingEarfcn" desc="usSrvingEarfcn" length="2" type="uint" />
+        <PARA name="ulObjEarfcn" desc="ulObjEarfcn" length="4" type="uint" />
+        <PARA name="RRC_APP_BOOL_ENUM" desc="enCnfFlg" length="1" type="enum" />
+        <PARA name="enEvtType" desc="enEvtType" length="1" type="uint" />
+        <PARA name="ucIfScell" desc="ucIfScell" length="1" type="uint" />
+        <PARA name="LRRC_OM_MEAS_OBJ_TYPE_ENUM" desc="enObjType" length="1" type="enum" />
+        <PARA name="ucPcellRsrp" desc="ucPcellRsrp" length="1" type="uint" />
+        <PARA name="ucPcellRsrq" desc="ucPcellRsrq" length="1" type="uint" />
+        <PARA name="ucNcellEnergy" desc="ucNcellEnergy" length="1" type="uint" />
+        <PARA name="ucNcellQulity" desc="ucNcellQulity" length="1" type="uint" />
+        <PARA name="ucNcellEnergySnd" desc="ucNcellEnergySnd" length="1" type="uint" />
+        <PARA name="ucRsv0" desc="ucRsv0" length="1" type="uint" />
+        <PARA name="ucRsv1" desc="ucRsv1" length="1" type="uint" />
+        <PARA name="ucRsv2" desc="ucRsv2" length="1" type="uint" />
+        <PARA name="usNcellId" desc="usNcellId" length="2" type="uint" />
+        <PARA name="usNcellIdSnd" desc="usNcellIdSnd" length="2" type="uint" />
+    </SUBPARA>
+    <SUBPARA name="LRRC_OM_SCELL_ID">
+        <PARA name="SubEventId" desc="LRRC_OM_SCELL_ID" length="2" type="enum" />
+        <PARA name="ulGci" desc="ulGci" length="4" type="uint" />
+        <PARA name="ulMcc" desc="ulMcc" length="4" type="uint" />
+        <PARA name="ulMnc" desc="ulMnc" length="4" type="uint" />
+        <PARA name="LRRC_OM_TAC_STRU" desc="stTac" length="2" type="class" />
+        <PARA name="usPhyCellId" desc="usPhyCellId" length="2" type="uint" />
+        <PARA name="usUlEarfcn" desc="usUlEarfcn" length="2" type="uint" />
+        <PARA name="usDlEarfcn" desc="usDlEarfcn" length="2" type="uint" />
+        <PARA name="ucServerCellBandInd" desc="ucServerCellBandInd" length="1" type="uint" />
+        <PARA name="ucRsv" desc="ucRsv" length="1" type="uint" />
+    </SUBPARA>
+    <SUBPARA name="LRRC_OM_TAC_STRU">
+        <PARA name="SubEventId" desc="LRRC_OM_TAC_STRU" length="2" type="enum" />
+        <PARA name="ucTac" desc="ucTac" length="1" type="uint" />
+        <PARA name="ucTacCont" desc="ucTacCont" length="1" type="uint" />
+        <PARA name="aucReserved" desc="aucReserved" length="2" type="array" />
+    </SUBPARA>
+    <SUBPARA name="TLL2_LMAC_PREAMBLE_SPEC_NOT_MATCH_LOG_STRU">
+        <PARA name="SubEventId" desc="TLL2_LMAC_PREAMBLE_SPEC_NOT_MATCH_LOG_STRU" length="2" type="enum" />
+        <PARA name="TLL2_LMAC_PREAMBLE_SPEC_NOT_MATCH_RESULT_ENUM" desc="enRaResult" length="1" type="enum" />
+        <PARA name="ucRsv" desc="ucRsv" length="1" type="uint" />
+        <PARA name="usSelfAdjTaTimes" desc="usSelfAdjTaTimes" length="2" type="uint" />
+        <PARA name="LRRC_OM_SCELL_ID" desc="stCellInfo" length="2" type="class" />
+        <PARA name="LMAC_OM_PRACH_CONFIG_STRU" desc="stPrachConfig" length="2" type="class" />
+    </SUBPARA>
+    <SUBPARA name="TLL2_OOS_INFO_STRU_SUBEVENT">
+        <PARA name="SubEventId" desc="TLL2_OOS_INFO_STRU_SUBEVENT" length="2" type="enum" />
+        <PARA name="uccause" desc="uccause" length="1" type="uint" />
+        <PARA name="ucinActivationTime" desc="ucinActivationTime" length="1" type="uint" />
+        <PARA name="uctfcsIdentity" desc="uctfcsIdentity" length="1" type="uint" />
+        <PARA name="ucReserved" desc="ucReserved" length="1" type="uint" />
+    </SUBPARA>
+    <SUBPARA name="TRRC_APP_COLLECT_TDS_FREQ_REPORT_STRU_SUBEVENT">
+        <PARA name="SubEventId" desc="TRRC_APP_COLLECT_TDS_FREQ_REPORT_STRU_SUBEVENT" length="2" type="enum" />
+        <PARA name="aulFreqList_0" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_1" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_2" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_3" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_4" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_5" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_6" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_7" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_8" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_9" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_10" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_11" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_12" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_13" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_14" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_15" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_16" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_17" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_18" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_19" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_20" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_21" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_22" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_23" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_24" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_25" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_26" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_27" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_28" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_29" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_30" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_31" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_32" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_33" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_34" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_35" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_36" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_37" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_38" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_39" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_40" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_41" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_42" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_43" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_44" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_45" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_46" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_47" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_48" desc="aulFreqList" length="2" type="uint" />
+        <PARA name="aulFreqList_49" desc="aulFreqList" length="2" type="uint" />
+    </SUBPARA>
+    <SUBPARA name="TRRC_OOS_INFO_STRU_SUBEVENT">
+        <PARA name="SubEventId" desc="TRRC_OOS_INFO_STRU_SUBEVENT" length="2" type="enum" />
+        <PARA name="TRRC_CHR_OUT_OF_SYNC_CAUSE_ENUM" desc="enOutOfSyncCause" length="2" type="enumArray" arraysize="2" />
+        <PARA name="ucIntraFreqRscp" desc="ucIntraFreqRscp" length="2" type="varchar" />
+        <PARA name="ulAsyMsgBitmap" desc="ulAsyMsgBitmap" length="4" type="uint" />
+        <PARA name="ulAsyAssistMsgBitmap" desc="ulAsyAssistMsgBitmap" length="4" type="uint" />
+        <PARA name="ulTrrcT314Length" desc="ulTrrcT314Length" length="4" type="uint" />
+        <PARA name="ulTrrcT315Length" desc="ulTrrcT315Length" length="4" type="uint" />
+        <PARA name="ulMcc" desc="ulMcc" length="4" type="uint" />
+        <PARA name="ulMnc" desc="ulMnc" length="4" type="uint" />
+        <PARA name="usLac" desc="usLac" length="2" type="uint" />
+        <PARA name="usServFreq" desc="usServFreq" length="2" type="uint" />
+        <PARA name="usServParaId" desc="usServParaId" length="2" type="uint" />
+        <PARA name="ucServRscp" desc="ucServRscp" length="2" type="varchar" />
+        <PARA name="ulServIdentityId" desc="ulServIdentityId" length="4" type="uint" />
+    </SUBPARA>
+    <SUBPARA name="TRRC_OUT_OF_SYNC_CELL_UPDATE_INFO_STRU_SUBEVENT">
+        <PARA name="SubEventId" desc="TRRC_OUT_OF_SYNC_CELL_UPDATE_INFO_STRU_SUBEVENT" length="2" type="enum" />
+        <PARA name="ucCellUpdateRscp" desc="ucCellUpdateRscp" length="1" type="int" />
+        <PARA name="ucOutOfSyncRscp" desc="ucOutOfSyncRscp" length="1" type="int" />
+        <PARA name="PS_BOOL_ENUM" desc="enRrcConnRelFlag" length="1" type="enum" />
+        <PARA name="Reserved" desc="Reserved" length="1" type="uint" />
+        <PARA name="usOutOfSyncFreq" desc="usOutOfSyncFreq" length="2" type="uint" />
+        <PARA name="usOutOfSyncParaId" desc="usOutOfSyncParaId" length="2" type="uint" />
+        <PARA name="usCellUpdateFreq" desc="usCellUpdateFreq" length="2" type="uint" />
+        <PARA name="usCellUpdateParaId" desc="usCellUpdateParaId" length="2" type="uint" />
+        <PARA name="ulAsyToCellUpdtTimeDiff" desc="ulAsyToCellUpdtTimeDiff" length="4" type="uint" />
+        <PARA name="ulOutOfSyncIdentityId" desc="ulOutOfSyncIdentityId" length="4" type="uint" />
+        <PARA name="ulCellUpdtIdentityId" desc="ulCellUpdtIdentityId" length="4" type="uint" />
+        <PARA name="ulTrrcT314Length" desc="ulTrrcT314Length" length="4" type="uint" />
+        <PARA name="ulTrrcT315Length" desc="ulTrrcT315Length" length="4" type="uint" />
+    </SUBPARA>
+</LOGFMTDEF>

@@ -1,0 +1,1 @@
+obj-$(CONFIG_ANC_NCX8293)	:= anc_ncx8293.o
