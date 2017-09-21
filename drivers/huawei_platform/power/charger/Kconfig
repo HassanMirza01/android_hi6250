@@ -4,3 +4,7 @@ source "drivers/huawei_platform/power/charger/charger_sensorhub/Kconfig"
 config HUAWEI_CHARGER
 	bool "huawei charger"
 	default n
+
+config ADVANCED_CHARGE_CONTROL
+	bool "advanced charge control features"
+	default n

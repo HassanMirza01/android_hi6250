@@ -22,10 +22,32 @@
 #include <linux/power/hisi/coul/hisi_coul_drv.h>
 #include <charging_core.h>
 
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+#include <linux/advanced_charge_control.h>
+#endif
+
 #define HWLOG_TAG charging_core
 HWLOG_REGIST();
 
 struct charge_core_info *g_core_info;
+
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+void setFastcharge(bool active) {
+	if (active) {
+		// USB3 maximum is 900mA
+		g_core_info->data.iin_usb = USB_FASTCHARGE_CURRENT_LIMIT;
+
+		// use only up to 686mA for charging
+		g_core_info->data.ichg_usb = USB_FASTCHARGE_CHARGE_LIMIT;
+	} else {
+		g_core_info->data.iin_usb = USB_NORMALCHARGE_CURRENT_LIMIT;
+		g_core_info->data.ichg_usb = USB_NORMALCHARGE_CHARGE_LIMIT;
+	}
+	hwlog_debug("iin_usb = %d\n", g_core_info->data.iin_usb);
+	hwlog_debug("ichg_usb = %d\n", g_core_info->data.ichg_usb);
+}
+#endif
+
 /**********************************************************
 *  Function:       charge_core_tbatt_handler
 *  Discription:    update the charge parameters in different battery temperature

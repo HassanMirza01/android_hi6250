@@ -33,6 +33,10 @@
 #include <linux/power/hisi/charger/hisi_charger.h>
 #endif
 
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+#include <linux/advanced_charge_control.h>
+#endif
+
 #include <linux/power/hisi/coul/hisi_coul_drv.h>
 #include <linux/power/hisi/hisi_bci_battery.h>
 #include <hisi_scharger_v200.h>
@@ -43,6 +47,24 @@
 #include <linux/version.h>/*lint !e451*/
 struct hi6522_device_info *g_hi6522_dev = NULL;
 struct hi6522_device_info *scharger_di = NULL;
+
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+// limiter for overvoltage while charging
+static u32 limiter_dpm_voltage = VINDPM_4200;
+
+// limiter for maximum battery voltage
+static u32 limiter_terminal_voltage = 4200;
+
+// fastcharge
+static u8 fastcharge_enable = 0;
+
+static int hi6522_set_dpm_voltage(int vindpm);
+static int hi6522_set_terminal_voltage(int charge_voltage);
+
+static u8 hi6522_get_dpm_voltage(void);
+static u8 hi6522_get_terminal_voltage(void);
+#endif
+
 static u8 dpm_switch_enable = 0;
 static u32 is_board_type = 0;	/*0:sft 1:udp 2:asic */
 static unsigned int iin_limit_option[IIN_OPTION_NUM] = {500,1000,1200,1500,1600,1800,2000};
@@ -257,6 +279,11 @@ struct hi6522_sysfs_field_info {
 };
 
 static struct hi6522_sysfs_field_info hi6522_sysfs_field_tbl[] = {
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+	hi6522_SYSFS_FIELD_RW(fastcharge_enable, NONE, NONE),
+	hi6522_SYSFS_FIELD_RW(limiter_dpm_voltage, NONE, NONE),
+	hi6522_SYSFS_FIELD_RW(limiter_terminal_voltage, NONE, NONE),
+#endif
 	hi6522_SYSFS_FIELD_RW(dpm_switch_enable, NONE, NONE),
 	hi6522_SYSFS_FIELD_RW(reg_addr, NONE, NONE),
 	hi6522_SYSFS_FIELD_RW(reg_value, NONE, NONE),
@@ -332,6 +359,32 @@ static ssize_t hi6522_sysfs_show(struct device *dev,
 		return scnprintf(buf, PAGE_SIZE, "%d\n", dpm_switch_enable);
 	}
 
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+	if (!strncmp
+	    ("fastcharge_enable", attr->attr.name,
+	     strlen("fastcharge_enable"))) {
+		return scnprintf(buf, PAGE_SIZE, "%d\n", fastcharge_enable);
+	}
+
+	if (!strncmp
+	    ("limiter_dpm_voltage", attr->attr.name,
+	     strlen("limiter_dpm_voltage"))) {
+
+		u8 dpm_voltage_val = hi6522_get_dpm_voltage();
+
+		return scnprintf(buf, PAGE_SIZE, "value=%d dpm_voltage=%d\n", limiter_dpm_voltage, dpm_voltage_val);
+	}
+
+	if (!strncmp
+	    ("limiter_terminal_voltage", attr->attr.name,
+	     strlen("limiter_terminal_voltage"))) {
+
+		u8 terminal_voltage_val = hi6522_get_terminal_voltage();
+
+		return scnprintf(buf, PAGE_SIZE, "value=%d terminal_voltage=%d\n", limiter_terminal_voltage, terminal_voltage_val);
+	}
+#endif
+
 	if (!strncmp("reg_addr", attr->attr.name, strlen("reg_addr"))) {
 		return scnprintf(buf, PAGE_SIZE, "0x%hhx\n", info->reg);
 	}
@@ -372,6 +425,86 @@ static ssize_t hi6522_sysfs_store(struct device *dev,
 	if (!info)
 		return -EINVAL;
 
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+	if (!strncmp
+	    ("limiter_dpm_voltage", attr->attr.name,
+	     strlen("limiter_dpm_voltage"))) {
+		u32 value;
+		ret = kstrtou32(buf, 0, &value);
+		if (ret < 0)
+			return ret;
+		if (value == VINDPM_3960) {
+			limiter_dpm_voltage = value;
+			ret = hi6522_set_dpm_voltage(value);
+			if (ret < 0)
+			  return ret;
+			return count;
+		} if (value == VINDPM_4040) {
+			limiter_dpm_voltage = value;
+			ret = hi6522_set_dpm_voltage(value);
+			if (ret < 0)
+			  return ret;
+			return count;
+		} if (value == VINDPM_4120) {
+			limiter_dpm_voltage = value;
+			ret = hi6522_set_dpm_voltage(value);
+			if (ret < 0)
+			  return ret;
+			return count;
+		} if (value == VINDPM_4200) {
+			limiter_dpm_voltage = value;
+			ret = hi6522_set_dpm_voltage(value);
+			if (ret < 0)
+			  return ret;
+			return count;
+		} if (value == VINDPM_4280) {
+			limiter_dpm_voltage = value;
+			ret = hi6522_set_dpm_voltage(value);
+			if (ret < 0)
+			  return ret;
+			return count;
+		} if (value == VINDPM_4360) {
+			limiter_dpm_voltage = value;
+			ret = hi6522_set_dpm_voltage(value);
+			if (ret < 0)
+			  return ret;
+			return count;
+		} if (value == VINDPM_4440) {
+			limiter_dpm_voltage = value;
+			ret = hi6522_set_dpm_voltage(value);
+			if (ret < 0)
+			  return ret;
+			return count;
+		} if (value == VINDPM_4520) {
+			limiter_dpm_voltage = value;
+			ret = hi6522_set_dpm_voltage(value);
+			if (ret < 0)
+			  return ret;
+			return count;
+		} else {
+			return -EINVAL;
+		}
+	}
+
+	if (!strncmp
+	    ("limiter_terminal_voltage", attr->attr.name,
+	     strlen("limiter_terminal_voltage"))) {
+		u32 value;
+		ret = kstrtou32(buf, 0, &value);
+		if (ret < 0)
+			return ret;
+		if (value >= 3960 && value <= 4350) { // stock fastcharge limit is 4350, minimum should be 80%
+			limiter_terminal_voltage = value;
+			ret = hi6522_set_terminal_voltage(CHG_FAST_VCHG_VALUE(value));
+			if (ret < 0)
+			  return ret;
+			return count;
+		} else {
+			return -EINVAL;
+		}
+	}
+#endif
+
 	ret = kstrtou8(buf, 0, &v);
 	if (ret < 0)
 		return ret;
@@ -386,6 +519,20 @@ static ssize_t hi6522_sysfs_store(struct device *dev,
 			return -EINVAL;
 		}
 	}
+
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+	if (!strncmp
+	    ("fastcharge_enable", attr->attr.name,
+	     strlen("fastcharge_enable"))) {
+		if (v == 1 || v == 0) {
+			fastcharge_enable = v;
+			setFastcharge(v == 1);
+			return count;
+		} else {
+			return -EINVAL;
+		}
+	}
+#endif
 
 	if (!strncmp(("reg_value"), attr->attr.name, strlen("reg_value"))) {
 		info2 = hi6522_sysfs_field_lookup("reg_addr");
@@ -494,6 +641,12 @@ static int hi6522_set_dpm_voltage(int vindpm)
 {
 	u8 vindpm_limit = 0;
 
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+	if (vindpm > limiter_dpm_voltage) {
+		vindpm = limiter_dpm_voltage;
+	}
+#endif
+
 	if (vindpm < VINDPM_MIN_3880)
 		vindpm = VINDPM_MIN_3880;
 	else if (vindpm > VINDPM_MAX_5080)
@@ -506,6 +659,23 @@ static int hi6522_set_dpm_voltage(int vindpm)
 	return hi6522_write_mask(CHG_DPM_SEL_REG, CHG_DPM_SEL_MSK,
 				 CHG_DPM_SEL_SHIFT, vindpm_limit);
 }
+
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+/**********************************************************
+*  Function:       hi6522_get_dpm_voltage
+*  Discription:    gets the dpm voltage in charging process
+*  Parameters:   NULL
+*  return value:  value:dpm voltage value
+**********************************************************/
+static u8 hi6522_get_dpm_voltage(void)
+{
+	int ret;
+	u8 data = -1;
+
+	ret = hi6522_read_mask(CHG_DPM_SEL_REG, CHG_DPM_SEL_MSK, CHG_DPM_SEL_SHIFT, &data);
+	return data;
+}
+#endif
 
 /**********************************************************
 *  Function:     hi6522_set_precharge_current()
@@ -641,6 +811,13 @@ static int hi6522_set_terminal_current(int term_current)
 static int hi6522_set_terminal_voltage(int charge_voltage)
 {
 	u8 data;
+
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+	if (charge_voltage > limiter_terminal_voltage) {
+		charge_voltage = limiter_terminal_voltage;
+	}
+#endif
+
 	if (charge_voltage < CHG_FAST_VCHG_MIN) {
 		charge_voltage = CHG_FAST_VCHG_MIN;
 	} else if (charge_voltage > CHG_FAST_VCHG_MAX) {
@@ -654,6 +831,23 @@ static int hi6522_set_terminal_voltage(int charge_voltage)
 	return hi6522_write_mask(CHG_FAST_VCHG_REG, CHG_FAST_VCHG_MSK,
 				 CHG_FAST_VCHG_SHIFT, data);
 }
+
+#ifdef CONFIG_ADVANCED_CHARGE_CONTROL
+/**********************************************************
+*  Function:       hi6522_get_terminal_voltage
+*  Discription:    gets the terminal voltage in charging process
+*  Parameters:   NULL
+*  return value:  value:terminal voltage value mv
+**********************************************************/
+static u8 hi6522_get_terminal_voltage(void)
+{
+	int ret;
+	u8 data = -1;
+
+	ret = hi6522_read_mask(CHG_FAST_VCHG_REG, CHG_FAST_VCHG_MSK, CHG_FAST_VCHG_SHIFT, &data);
+	return data;
+}
+#endif
 
 /**********************************************************
 *  Function:       hi6522_set_vclamp
