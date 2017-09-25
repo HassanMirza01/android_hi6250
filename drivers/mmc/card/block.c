@@ -85,10 +85,19 @@
 MODULE_ALIAS("mmc:block");
 /*not referenced,modified for pclint*/
 
-#ifdef MODULE_PARAM_PREFIX
-#undef MODULE_PARAM_PREFIX
+#ifdef CONFIG_SYSTEM_LINEAGEOS
+  #ifdef MODULE_PARAM_PREFIX
+  #undef MODULE_PARAM_PREFIX
+  #endif
+  #define MODULE_PARAM_PREFIX "mmcblk."
+#else
+  /*
+  #ifdef MODULE_PARAM_PREFIX
+  #undef MODULE_PARAM_PREFIX
+  #endif
+  #define MODULE_PARAM_PREFIX "mmcblk."
+  */
 #endif
-#define MODULE_PARAM_PREFIX "mmcblk."
 
 #define INAND_CMD38_ARG_EXT_CSD  113
 #define INAND_CMD38_ARG_ERASE    0x00

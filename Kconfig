@@ -8,4 +8,15 @@ config SRCARCH
 	string
 	option env="SRCARCH"
 
+config SYSTEM_LINEAGEOS
+	bool "build for LOS based ROMs"
+	default n
+	help
+	  LineageOS needs a different configuration compared to
+	  stock rom.
+
+	  Say Y here if you want to build kernel for LineageOS rom.
+
+	  If building for stock rom, say N here.
+
 source "arch/$SRCARCH/Kconfig"
