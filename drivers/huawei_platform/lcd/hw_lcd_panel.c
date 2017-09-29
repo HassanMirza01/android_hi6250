@@ -1236,6 +1236,27 @@ static int hw_lcd_remove(struct platform_device* pdev)
 	return 0;
 }
 
+#ifdef CONFIG_HUAWEI_LCD_PANEL_DARKNESS_MOD
+uint32_t recalculate_bl_level(uint32_t level) {
+	// valid results are 0..255
+	// any recalculations would result in missing level 255
+	// so we use 0..255 for the 253 incoming values and skip at 17,32,47 (~ 6/12/18% of range)
+	if (level < 3) {
+		return 0;
+	}
+	if (level <= 16) {
+		return level-3;
+	}
+	if (level <= 31) {
+		return level-2;
+	}
+	if (level <= 46) {
+		return level-1;
+	}
+	return level;
+}
+#endif
+
 /*
 *name:hw_lcd_set_backlight
 *function:set backlight level
@@ -1338,7 +1359,12 @@ static int hw_lcd_set_backlight(struct platform_device* pdev, uint32_t bl_level)
 		mipi_dsi0_base = hisifd->mipi_dsi0_base;
 
 		bl_level = (bl_level < hisifd->panel_info.bl_max) ? bl_level : hisifd->panel_info.bl_max;
+#ifdef CONFIG_HUAWEI_LCD_PANEL_DARKNESS_MOD
+		// the bl_level would cause screen of at zero, so only change bl_level_adjust[1] which is valid from 0 to 255
+		bl_level_adjust[1] = recalculate_bl_level(bl_level)  * 255 / hisifd->panel_info.bl_max;
+#else
 		bl_level_adjust[1] = bl_level  * 255 / hisifd->panel_info.bl_max;
+#endif
 		level = bl_level_adjust[1];
 		/*unlock command one*/
 		if (lcd_info.lock_cmd_support) {
@@ -1356,6 +1382,9 @@ static int hw_lcd_set_backlight(struct platform_device* pdev, uint32_t bl_level)
 		}
 		else
 		{
+#ifdef CONFIG_HUAWEI_LCD_PANEL_DARKNESS_MOD
+			HISI_FB_INFO("bl_level=%d level=%d\n", bl_level, level);
+#endif
 			mipi_dsi_cmds_tx(lcd_bl_level_adjust, \
 				ARRAY_SIZE(lcd_bl_level_adjust), mipi_dsi0_base);
 		}
@@ -1911,7 +1940,8 @@ static ssize_t hw_lcd_check_reg_show(struct platform_device* pdev, char* buf)
 	}
 	mipi_dsi0_base = hisifd->mipi_dsi0_base;
 
-	HISI_FB_DEBUG("fb%d, +.\n", hisifd->index);
+	HISI_FB_DEBUG("fb%d, +.\n", hisifd->index);
+
 
 	lcd_check_reg[0].dtype = lcd_info.read_data_type;
 

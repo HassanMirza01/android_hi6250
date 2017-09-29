@@ -7,3 +7,11 @@ config HUAWEI_LCD_PANEL
 	default n
 	help
 	  If you say yes here you get support for huawei lcd panel.
+
+config HUAWEI_LCD_PANEL_DARKNESS_MOD
+	bool "huawei lcd panel darkness mod"
+	default n
+	help
+	  If you say yes here you get support for full spectrum of hardware
+	  brightness levels (only supported panels, a.t.m. only
+	  AUO_ILI9885 5.5' VIDEO TFT 1080 x 1920 is supported)
