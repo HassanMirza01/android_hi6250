@@ -1655,18 +1655,16 @@ int mmc_regulator_set_ocr(struct mmc_host *mmc,
 	return result;
 }
 EXPORT_SYMBOL_GPL(mmc_regulator_set_ocr);
+
 #endif /* CONFIG_REGULATOR */
+
 int mmc_regulator_get_supply(struct mmc_host *mmc)
 {
 	struct device *dev = mmc_dev(mmc);
 	int ret;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0))
+
 	mmc->supply.vmmc = devm_regulator_get_optional(dev, "vmmc");
 	mmc->supply.vqmmc = devm_regulator_get_optional(dev, "vqmmc");
-#else
-	mmc->supply.vmmc = devm_regulator_get(dev, "vmmc");
-	mmc->supply.vqmmc = devm_regulator_get(dev, "vqmmc");
-#endif
 
 	if (IS_ERR(mmc->supply.vmmc)) {
 		if (PTR_ERR(mmc->supply.vmmc) == -EPROBE_DEFER)
@@ -1836,9 +1834,9 @@ int mmc_set_signal_voltage(struct mmc_host *host, int signal_voltage, u32 ocr)
 	mmc_delay(1);
 
 	/*
-	* Failure to switch is indicated by the card holding
-	* dat[0:3] low
-	*/
+	 * Failure to switch is indicated by the card holding
+	 * dat[0:3] low
+	 */
 	if (host->ops->card_busy && host->ops->card_busy(host)) {
 		err = -EAGAIN;
 		pr_err("%s: cmd11 data0 low\n", mmc_hostname(host));
@@ -1847,11 +1845,11 @@ power_cycle:
 	if (err) {
 		printk(KERN_ERR "%s: Signal voltage switch failed, "
 			"power cycling card\n", mmc_hostname(host));
-		mmc_power_cycle(host,ocr);
+		mmc_power_cycle(host, ocr);
 	}
 	else
 	{
-	   printk(KERN_ERR "%s:host and card voltage have changed into 1.8v success!\n",mmc_hostname(host));
+		printk(KERN_ERR "%s:host and card voltage have changed into 1.8v success!\n",mmc_hostname(host));
 	}
 	mmc_host_clk_release(host);
 
