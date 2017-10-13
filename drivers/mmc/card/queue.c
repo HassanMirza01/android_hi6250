@@ -9,21 +9,17 @@
  * published by the Free Software Foundation.
  *
  */
-#include <linux/version.h>
 #include <linux/slab.h>
 #include <linux/module.h>
 #include <linux/blkdev.h>
 #include <linux/freezer.h>
 #include <linux/kthread.h>
 #include <linux/scatterlist.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0)
 #include <linux/dma-mapping.h>
-#endif
 
 #include <linux/mmc/card.h>
 #include <linux/mmc/host.h>
 #include "queue.h"
-
 
 #ifdef CONFIG_MMC_BLOCK_BOUNCE
 #define MMC_QUEUE_BOUNCESZ	65536
@@ -201,11 +197,8 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
 	struct mmc_queue_req *mqrq_prev = &mq->mqrq[1];
 
 	if (mmc_dev(host)->dma_mask && *mmc_dev(host)->dma_mask)
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0)
 		limit = (u64)dma_max_pfn(mmc_dev(host)) << PAGE_SHIFT;
-#else
-		limit = *mmc_dev(host)->dma_mask;
-#endif
+
 	mq->card = card;
 #ifdef CONFIG_MMC_CQ_HCI
 	if (card->ext_csd.cmdq_mode_en
@@ -224,9 +217,7 @@ int mmc_init_queue(struct mmc_queue *mq, struct mmc_card *card,
 
 	blk_queue_prep_rq(mq->queue, mmc_prep_request);
 	queue_flag_set_unlocked(QUEUE_FLAG_NONROT, mq->queue);
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0))
 	queue_flag_clear_unlocked(QUEUE_FLAG_ADD_RANDOM, mq->queue);
-#endif
 	if (mmc_can_erase(card))
 		mmc_queue_setup_discard(mq->queue, card);
 

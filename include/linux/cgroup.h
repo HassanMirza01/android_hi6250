@@ -256,7 +256,6 @@ struct task_struct *cgroup_taskset_next(struct cgroup_taskset *tset);
 	for ((task) = cgroup_taskset_first((tset)); (task);		\
 	     (task) = cgroup_taskset_next((tset)))
 
-
 #define SUBSYS(_x) extern struct cgroup_subsys _x ## _cgrp_subsys;
 #include <linux/cgroup_subsys.h>
 #undef SUBSYS

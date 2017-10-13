@@ -1164,7 +1164,7 @@ struct ext4_super_block {
 /*D0*/	__u8	s_journal_uuid[16];	/* uuid of journal superblock */
 /*E0*/	__le32	s_journal_inum;		/* inode number of journal file */
 	__le32	s_journal_dev;		/* device number of journal file */
-	__le32	s_last_orphan;
+	__le32	s_last_orphan;		/* start of list of inodes to delete */
 	__le32	s_hash_seed[4];		/* HTREE hash seed */
 	__u8	s_def_hash_version;	/* Default hash version to use */
 	__u8	s_jnl_backup_type;

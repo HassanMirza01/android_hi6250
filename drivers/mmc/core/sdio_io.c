@@ -76,7 +76,7 @@ int sdio_enable_func(struct sdio_func *func)
 	ret = mmc_io_rw_direct(func->card, 1, 0, SDIO_CCCR_IOEx, reg, NULL);
 	if (ret)
 		goto err;
-		
+
 	timeout = jiffies + msecs_to_jiffies(func->enable_timeout);
 
 	while (1) {
@@ -744,11 +744,11 @@ int sdio_set_host_pm_flags(struct sdio_func *func, mmc_pm_flag_t flags)
 	BUG_ON(!func->card);
 
 	host = func->card->host;
-    
+
 	if (flags & ~host->pm_caps)
-	    return -EINVAL;
- 
-    /* function suspend methods are serialized, hence no lock needed */
+		return -EINVAL;
+
+	/* function suspend methods are serialized, hence no lock needed */
 	host->pm_flags |= flags;
 	return 0;
 }

@@ -384,12 +384,9 @@ static unsigned mmc_sdio_get_max_clock(struct mmc_card *card)
 		 * mandatory.
 		 */
 		max_dtr = 50000000;
-	} else
-	{
+	} else {
 		max_dtr = card->cis.max_dtr;
 	}
-
-
 
 	if (card->type == MMC_TYPE_SD_COMBO)
 		max_dtr = min(max_dtr, mmc_sd_get_max_clock(card));/*lint !e666*/
@@ -563,7 +560,7 @@ static int mmc_sdio_init_uhs_card(struct mmc_card *card)
 	/*
 	 * Switch to wider bus (if supported).
 	 */
-	if (card->host->caps & MMC_CAP_4_BIT_DATA){
+	if (card->host->caps & MMC_CAP_4_BIT_DATA) {
 		err = sdio_enable_4bit_bus(card);
 		if (err)
 			goto out;
@@ -608,10 +605,9 @@ static int mmc_sdio_init_card(struct mmc_host *host, u32 ocr,
 
 	/* to query card if 1.8V signalling is supported */
 	if (mmc_host_uhs(host))
-	    ocr |= R4_18V_PRESENT;
+		ocr |= R4_18V_PRESENT;
 
 try_again:
-
 	if (!retries) {
 		pr_warning("%s: Skipping voltage switch\n",
 				mmc_hostname(host));
@@ -807,8 +803,6 @@ try_again:
 			card->dev.type = &sd_type;
 	}
 
-
-
 	/*
 	 * If needed, disconnect card detection pull-up resistor.
 	 */
@@ -968,16 +962,14 @@ static int mmc_sdio_pre_suspend(struct mmc_host *host)
  */
 static int mmc_sdio_suspend(struct mmc_host *host)
 {
-
 	if (mmc_card_keep_power(host) && mmc_card_wake_sdio_irq(host)) {
 		mmc_claim_host(host);
 		sdio_disable_wide(host->card);
 		mmc_release_host(host);
 	}
 
-	if (!mmc_card_keep_power(host)){
-	    mmc_power_off(host);
-	}
+	if (!mmc_card_keep_power(host))
+		mmc_power_off(host);
 
 	return 0;
 }
@@ -994,7 +986,7 @@ static int mmc_sdio_resume(struct mmc_host *host)
 
 	/* Restore power if needed */
 	if (!mmc_card_keep_power(host)) {
-        mmc_power_up(host,host->card->ocr);
+		mmc_power_up(host, host->card->ocr);
 		/*
 		 * Tell runtime PM core we just powered up the card,
 		 * since it still believes the card is powered off.
@@ -1265,7 +1257,8 @@ err:
 int sdio_reset_comm(struct mmc_card *card)
 {
 	struct mmc_host *host = card->host;
-	u32 ocr, rocr;
+	u32 ocr;
+	u32 rocr;
 	int err;
 
 	printk("%s():\n", __func__);

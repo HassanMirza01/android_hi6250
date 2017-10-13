@@ -737,14 +737,14 @@ void pm_print_active_wakeup_sources(void)
 		}
 	}
 
-	if (!active && last_activity_ws){
+	if (!active && last_activity_ws) {
 		pr_info("last active wakeup source: %s\n",
 			last_activity_ws->name);
 #ifdef CONFIG_HW_PTM
         power_monitor_report(FREEZING_FAILED,"%s",
-            last_activity_ws->name);
+		last_activity_ws->name);
 #endif
-    }
+	}
 	rcu_read_unlock();
 }
 EXPORT_SYMBOL_GPL(pm_print_active_wakeup_sources);
