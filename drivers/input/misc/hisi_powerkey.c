@@ -1,5 +1,5 @@
 /*
- * hisi_hisi_powerkey.c - Hisilicon MIC powerkey driver
+ * hisi_powerkey.c - Hisilicon MIC powerkey driver
  *
  * Copyright (C) 2013 Hisilicon Ltd.
  * Copyright (C) 2013 Linaro Ltd.
@@ -18,20 +18,20 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <linux/platform_device.h>
+#include <linux/interrupt.h>
+#include <linux/wakelock.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/of_irq.h>
-#include <linux/platform_device.h>
 #include <linux/input.h>
 #include <linux/init.h>
-#include <linux/interrupt.h>
 #include <linux/version.h>
 
 #include <linux/delay.h>
 #include <linux/slab.h>
 #include <linux/regulator/consumer.h>
 #include <linux/platform_device.h>
-#include <linux/wakelock.h>
 #include <asm/irq.h>
 #include <linux/hisi/util.h>
 #include <linux/kthread.h>
@@ -447,13 +447,13 @@ static struct of_device_id hisi_powerkey_of_match[] = {
 MODULE_DEVICE_TABLE(of, hisi_powerkey_of_match);
 
 static struct platform_driver hisi_powerkey_driver = {
+	.driver = {
+		.owner = THIS_MODULE,
+		.name = "hisi-powerkey",
+		.of_match_table = hisi_powerkey_of_match,
+	},
 	.probe = hisi_powerkey_probe,
 	.remove = hisi_powerkey_remove,
-	.driver = {
-		   .owner = THIS_MODULE,
-		   .name = "hisi-powerkey",
-		   .of_match_table = hisi_powerkey_of_match,
-		   },
 #ifdef CONFIG_PM
 	.suspend = hisi_powerkey_suspend,
 	.resume = hisi_powerkey_resume,
@@ -462,6 +462,7 @@ static struct platform_driver hisi_powerkey_driver = {
 
 module_platform_driver(hisi_powerkey_driver);
 
+MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Zhiliang Xue <xuezhiliang@huawei.com");
 MODULE_DESCRIPTION("Hisi PMIC Power key driver");
 MODULE_LICENSE("GPL v2");
