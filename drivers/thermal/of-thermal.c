@@ -168,6 +168,7 @@ of_thermal_get_trip_points(struct thermal_zone_device *tz)
 }
 EXPORT_SYMBOL_GPL(of_thermal_get_trip_points);
 
+#ifndef CONFIG_HISI_IPA_THERMAL
 /**
  * of_thermal_set_emul_temp - function to set emulated temperature
  *
@@ -189,6 +190,7 @@ static int of_thermal_set_emul_temp(struct thermal_zone_device *tz,
 
 	return data->ops->set_emul_temp(data->sensor_data, temp);
 }
+#endif
 
 static int of_thermal_get_trend(struct thermal_zone_device *tz, int trip,
 				enum thermal_trend *trend)
@@ -431,6 +433,7 @@ thermal_zone_of_add_sensor(struct device_node *zone,
 	tzd->ops->get_trend = of_thermal_get_trend;
 #ifdef CONFIG_HISI_IPA_THERMAL
 	tzd->ops->set_emul_temp = NULL;
+
 #else
 	tzd->ops->set_emul_temp = of_thermal_set_emul_temp;
 #endif
