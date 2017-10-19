@@ -176,13 +176,13 @@ static int tsens_tz_code_to_degc(int adc_val)
 }
 
 #ifdef THERMAL_SOC_USER_CONTRL
-static int tsens_tz_degc_to_code(unsigned long degc)
+static int tsens_tz_degc_to_code(int degc)
 {
 	int code = 0;
 
-	if ((long)degc > TSENS_TEMP_END_VALUE)
+	if (degc > TSENS_TEMP_END_VALUE)
 		return TSENS_ADC_END_VALUE;
-	else if ((long)degc < TSENS_TEMP_START_VALUE)
+	else if (degc < TSENS_TEMP_START_VALUE)
 		return TSENS_THRESHOLD_MIN_CODE;
 
 	code = TSENS_ADC_START_VALUE + (degc - TSENS_TEMP_START_VALUE) * (TSENS_ADC_END_VALUE - TSENS_ADC_START_VALUE) /
@@ -281,7 +281,7 @@ static int hisi_tsens_mbox_notifier(struct notifier_block *nb, unsigned long len
 }
 
 static int tsens_tz_get_temp(struct thermal_zone_device *thermal,
-			     unsigned long *temp)
+			     int *temp)
 {
 	struct tsens_tm_device_sensor *tm_sensor = thermal->devdata;
 
@@ -290,9 +290,9 @@ static int tsens_tz_get_temp(struct thermal_zone_device *thermal,
 
 	tm_sensor->read_temperature[0] = g_tmdev->read_temperature_flag;
 	tm_sensor->read_temperature[1] = tm_sensor->sensor_num;
-	*temp = (unsigned long)hisi_tsens_cmd_send(tm_sensor, TSENSOR_READ_TEMPERATURE);
-	if ((long)*temp < TSENS_TEMP_START_VALUE) {
-		pr_err("%s: tsens get temperature value fail,temp=[%ld]\n", __func__, *temp);
+	*temp = hisi_tsens_cmd_send(tm_sensor, TSENSOR_READ_TEMPERATURE);
+	if (*temp < TSENS_TEMP_START_VALUE) {
+		pr_err("%s: tsens get temperature value fail,temp=[%d]\n", __func__, *temp);
 		return -EINVAL;
 	}
 
@@ -300,20 +300,20 @@ static int tsens_tz_get_temp(struct thermal_zone_device *thermal,
 }
 
 /*add for IPA*/
-int tsens_get_temp(u32 sensor, long *temp)
+int tsens_get_temp(u32 sensor, int *temp)
 {
 	int i = 0;
 	struct thermal_zone_device *thermal;
 	int ret = -EINVAL;
-	unsigned long tmp = 0;
+	int tmp = 0;
 
 	for (i = 0; i < g_tmdev->tsens_num_sensor; i++) {
 		if (sensor == g_tmdev->sensor[i].sensor_num) {
 			thermal = g_tmdev->sensor[i].tz_dev;
 			ret = tsens_tz_get_temp(thermal, &tmp);
-			if ((long)tmp < 0)
+			if (tmp < 0)
 				tmp = 0;
-			*temp = (long)tmp * 1000;
+			*temp = tmp * 1000;
 		}
 	}
 
@@ -343,7 +343,7 @@ int ipa_get_tsensor_id(const char *name)
 }
 EXPORT_SYMBOL_GPL(ipa_get_tsensor_id);
 
-int ipa_get_sensor_value(u32 sensor, long *val)
+int ipa_get_sensor_value(u32 sensor, int *val)
 {
 	int ret = -EINVAL;
 	u32 id = 0;
@@ -407,7 +407,7 @@ static int tsens_tz_get_trip_type(struct thermal_zone_device *thermal,
 }
 /*lint -e764 -e527 -esym(764,527,*)*/
 static int tsens_tz_get_trip_temp(struct thermal_zone_device *thermal,
-				   int trip, unsigned long *temp)
+				   int trip, int *temp)
 {
 	struct tsens_tm_device_sensor *tm_sensor = thermal->devdata;
 
@@ -419,18 +419,18 @@ static int tsens_tz_get_trip_temp(struct thermal_zone_device *thermal,
 	case TSENS_TRIP_WARM:
 		tm_sensor->read_thermal_h[0] = g_tmdev->read_thermal_h_flag;
 		tm_sensor->read_thermal_h[1] = tm_sensor->sensor_num;
-		*temp = (unsigned long)hisi_tsens_cmd_send(tm_sensor, TSENSOR_READ_THERMAL_H);
-		if ((long)*temp < TSENS_TEMP_START_VALUE) {
-			pr_err("%s: tsens get high thermal value fail, temperature=%ld\n", __func__, *temp);
+		*temp = hisi_tsens_cmd_send(tm_sensor, TSENSOR_READ_THERMAL_H);
+		if (*temp < TSENS_TEMP_START_VALUE) {
+			pr_err("%s: tsens get high thermal value fail, temperature=%d\n", __func__, *temp);
 			return -EINVAL;
 		}
 		break;
 	case TSENS_TRIP_COOL:
 		tm_sensor->read_thermal_l[0] = g_tmdev->read_thermal_l_flag;
 		tm_sensor->read_thermal_l[1] = tm_sensor->sensor_num;
-		*temp = (unsigned long)hisi_tsens_cmd_send(tm_sensor, TSENSOR_READ_THERMAL_L);
-		if ((long)*temp < TSENS_TEMP_START_VALUE) {
-			pr_err("%s: tsens get low thermal value fail, temperature=%ld\n", __func__, *temp);
+		*temp = hisi_tsens_cmd_send(tm_sensor, TSENSOR_READ_THERMAL_L);
+		if (*temp < TSENS_TEMP_START_VALUE) {
+			pr_err("%s: tsens get low thermal value fail, temperature=%d\n", __func__, *temp);
 			return -EINVAL;
 		}
 		break;
@@ -512,14 +512,14 @@ static int tsens_tz_activate_trip_type(struct thermal_zone_device *thermal,
 }
 
 static int tsens_tz_set_trip_temp(struct thermal_zone_device *thermal,
-				   int trip, unsigned long temp)
+				   int trip, int temp)
 {
 	U_TSENSOR_IPC *tsen_ipcdata = NULL;
 	struct tsens_tm_device_sensor *tm_sensor = thermal->devdata;
 	int ret;
 	int temperature;
 
-	if (!tm_sensor || trip < 0 || (long)temp < TSENS_TEMP_START_VALUE || (long)temp > TSENS_TEMP_END_VALUE)
+	if (!tm_sensor || trip < 0 || temp < TSENS_TEMP_START_VALUE || temp > TSENS_TEMP_END_VALUE)
 		return -EINVAL;
 
 	temperature = tsens_tz_degc_to_code(temp);

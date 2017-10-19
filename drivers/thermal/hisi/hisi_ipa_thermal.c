@@ -123,8 +123,8 @@ struct thermal {
 struct capacitances g_caps;
 struct thermal thermal_info;
 
-extern int ipa_get_sensor_value(u32 sensor, unsigned long *val);
-extern int ipa_get_periph_value(u32 sensor, long *val);
+extern int ipa_get_sensor_value(u32 sensor, int *val);
+extern int ipa_get_periph_value(u32 sensor, int *val);
 extern int ipa_get_tsensor_id(char *name);
 extern int ipa_get_periph_id(char *name);
 
@@ -572,10 +572,10 @@ void hisi_thermal_hotplug_check(long *temp)
 
 static int get_temp_value(void *data, int *temp)
 {
-	long sensor_val[IPA_SENSOR_NUM] = {0};
+	int sensor_val[IPA_SENSOR_NUM] = {0};
 	struct ipa_sensor *sensor = (struct ipa_sensor *)data;
-	long val = 0;
-	long val_max = 0;
+	int val = 0;
+	int val_max = 0;
 	int ret = -EINVAL;
 	int id = 0;
 	int est_temp = 0;

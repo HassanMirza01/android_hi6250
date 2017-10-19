@@ -271,7 +271,7 @@ static int temp_2_NTC_bisearch_table(int cur_temp, int table[][2], int table_siz
 	return table[0][0];
 }
 
-int hisi_peripheral_ntc_2_temp(struct periph_tsens_tm_device_sensor *chip, unsigned long *temp, int ntc)
+int hisi_peripheral_ntc_2_temp(struct periph_tsens_tm_device_sensor *chip, int *temp, int ntc)
 {
 	int tempdata = 0;
 	*temp = tempdata;
@@ -290,7 +290,7 @@ int hisi_peripheral_ntc_2_temp(struct periph_tsens_tm_device_sensor *chip, unsig
 	else
 		pr_err("input ntc name was not found!\n\r");
 
-	*temp = (unsigned long)tempdata;
+	*temp = (int)tempdata;
 	return 0;
 }
 
@@ -331,7 +331,7 @@ int hisi_peripheral_get_table_info(const char* ntc_name, unsigned long* dest,
 }
 
 /*ntc:Maybe Resistance, Adc or Volt in usr module*/
-int hisi_peripheral_temp_2_ntc(struct periph_tsens_tm_device_sensor *chip, unsigned long temp, u16 *ntc)
+int hisi_peripheral_temp_2_ntc(struct periph_tsens_tm_device_sensor *chip, int temp, u16 *ntc)
 {
 
 	if (chip->ntc_name == NULL) {

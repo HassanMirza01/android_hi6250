@@ -43,7 +43,7 @@ struct hisi_peripheral_tm_chip {
 	struct periph_tsens_tm_device_sensor sensor[0];
 };
 
-extern int hisi_peripheral_ntc_2_temp(struct periph_tsens_tm_device_sensor *chip, unsigned long *temp,int ntc);
-extern int hisi_peripheral_temp_2_ntc(struct periph_tsens_tm_device_sensor *chip, unsigned long temp,u16 *ntc);
+extern int hisi_peripheral_ntc_2_temp(struct periph_tsens_tm_device_sensor *chip, int *temp,int ntc);
+extern int hisi_peripheral_temp_2_ntc(struct periph_tsens_tm_device_sensor *chip, int temp,u16 *ntc);
 int hisi_peripheral_get_table_info(const char* ntc_name, unsigned long* dest, enum hkadc_table_id* table_id);
 #endif

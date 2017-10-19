@@ -36,7 +36,8 @@ static struct thermal_zone_device *gpu_tz;
 
 static unsigned long model_static_power(unsigned long voltage)
 {
-	unsigned long temperature, temp;
+	int temperature;
+	unsigned long temp;
 	unsigned long temp_squared, temp_cubed, temp_scaling_factor;
 	const unsigned long voltage_cubed = (voltage * voltage * voltage) >> 10;
 

@@ -112,7 +112,7 @@ void tm_debug(int onoff)
 }
 
 static int hisi_peripheral_tm_get_temp(struct thermal_zone_device *thermal,
-				      unsigned long *temp)
+				      int *temp)
 {
 	struct periph_tsens_tm_device_sensor *chip = thermal->devdata;
 	int ret = 0;
@@ -194,7 +194,7 @@ int hisi_peripheral_tm_target(union ipc_data *tm_ipc, int *value)
 }
 
 static int hisi_peripheral_tm_get_trip_temp(struct thermal_zone_device *thermal,
-				int trip, unsigned long *temp)
+				int trip, int *temp)
 {
 	struct periph_tsens_tm_device_sensor *tm_sensor = thermal->devdata;
 	union ipc_data tm_ipc;
@@ -253,7 +253,7 @@ static int hisi_peripheral_tm_get_trip_temp(struct thermal_zone_device *thermal,
 }
 
 static int hisi_peripheral_tm_set_trip_temp(struct thermal_zone_device *thermal,
-				int trip, unsigned long temp)
+				int trip, int temp)
 {
 	struct periph_tsens_tm_device_sensor *tm_sensor = thermal->devdata;
 	u16 volt = 0;
@@ -262,7 +262,7 @@ static int hisi_peripheral_tm_set_trip_temp(struct thermal_zone_device *thermal,
 	U_THERMAL_IPC_PARA *tm_ipc_para = (U_THERMAL_IPC_PARA *)tm_ipc.cmd_mix.cmd_para;
 
 	if (!tm_sensor || trip < 0 || (long)temp < NTC_TEMP_MIN_VALUE || (long)temp > NTC_TEMP_MAX_VALUE) {
-		pr_err("[%s] parm err temp[%lu]\n", __func__, temp);
+		pr_err("[%s] parm err temp[%d]\n", __func__, temp);
 		return -EINVAL;
 	}
 
@@ -747,20 +747,20 @@ static void __exit hisi_peripheral_tm_exit(void)
 	platform_driver_unregister(&hisi_peripheral_tm_driver);
 }
 
-int periph_get_temp(u32 sensor, long *temp)
+int periph_get_temp(u32 sensor, int *temp)
 {
 	u32 i;
 	struct thermal_zone_device *thermal;
 	int ret = -EINVAL;
-	unsigned long tmp = 0;
+	int tmp = 0;
 
 	for (i = 0; i < gtm_dev->tsens_num_sensor; i++) {
 		if ((sensor + TSENSOR_USED_NUM) == gtm_dev->sensor[i].sensor_num) {
 			thermal = gtm_dev->sensor[i].tz_dev;
 			ret = hisi_peripheral_tm_get_temp(thermal, &tmp);
-			if ((long)tmp < 0)
+			if (tmp < 0)
 				tmp = 0;
-			*temp = (long)tmp * 1000;
+			*temp = tmp * 1000;
 		}
 	}
 
@@ -789,7 +789,7 @@ int ipa_get_periph_id(const char *name)
 }
 EXPORT_SYMBOL_GPL(ipa_get_periph_id);
 
-int ipa_get_periph_value(u32 sensor, long *val)
+int ipa_get_periph_value(u32 sensor, int *val)
 {
 	int ret = -EINVAL;
 	u32 id = 0;
