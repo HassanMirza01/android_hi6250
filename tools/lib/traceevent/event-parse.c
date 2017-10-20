@@ -404,7 +404,9 @@ static int func_map_init(struct pevent *pevent)
 
 	qsort(func_map, pevent->func_count, sizeof(*func_map), func_cmp);
 
-	
+	/*
+	 * Add a special record at the end.
+	 */
 	func_map[pevent->func_count].func = NULL;
 	func_map[pevent->func_count].addr = 0;
 	func_map[pevent->func_count].mod = NULL;
