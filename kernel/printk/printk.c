@@ -455,7 +455,11 @@ static int log_store(int facility, int level,
 	}
 
 	if (log_next_idx + size + sizeof(struct printk_log) > log_buf_len) {
-		
+		/*
+		 * This message + an additional empty header does not fit
+		 * at the end of the buffer. Add an empty header with len == 0
+		 * to signify a wrap around.
+		 */
 		memset(log_buf + log_next_idx, 0, sizeof(struct printk_log));
 		log_next_idx = 0;
 	}

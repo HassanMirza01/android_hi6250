@@ -349,7 +349,19 @@ static void __munlock_pagevec(struct pagevec *pvec, struct zone *zone)
 		__putback_lru_fast(&pvec_putback, pgrescued);
 }
 
-
+/*
+ * Fill up pagevec for __munlock_pagevec using pte walk
+ *
+ * The function expects that the struct page corresponding to @start address is
+ * a non-TPH page already pinned and in the @pvec, and that it belongs to @zone.
+ *
+ * The rest of @pvec is filled by subsequent pages within the same pmd and same
+ * zone, as long as the pte's are present and vm_normal_page() succeeds. These
+ * pages also get pinned.
+ *
+ * Returns the address of the next page that should be scanned. This equals
+ * @start + PAGE_SIZE when no page could be added by the pte walk.
+ */
 static unsigned long __munlock_pagevec_fill(struct pagevec *pvec,
 		struct vm_area_struct *vma, int zoneid,	unsigned long start,
 		unsigned long end)
