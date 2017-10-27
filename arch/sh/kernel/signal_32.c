@@ -1,4 +1,13 @@
-
+/*
+ *  linux/arch/sh/kernel/signal.c
+ *
+ *  Copyright (C) 1991, 1992  Linus Torvalds
+ *
+ *  1997-11-28  Modified for POSIX.1b signals by Richard Henderson
+ *
+ *  SuperH version:  Copyright (C) 1999, 2000  Niibe Yutaka & Kaz Kojima
+ *
+ */
 #include <linux/sched.h>
 #include <linux/mm.h>
 #include <linux/smp.h>

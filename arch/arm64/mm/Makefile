@@ -12,5 +12,3 @@ obj-$(CONFIG_HUGETLB_PAGE)	+= hugetlbpage.o
 obj-$(CONFIG_ARM64_PTDUMP)	+= dump.o
 
 CFLAGS_mmu.o                   := -I$(srctree)/scripts/dtc/libfdt/
-obj-$(CONFIG_KASAN)		+= kasan_init.o
-KASAN_SANITIZE_kasan_init.o	:= n

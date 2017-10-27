@@ -1,4 +1,20 @@
-
+/*
+ *  linux/arch/arm/kernel/atags_compat.c
+ *
+ *  Copyright (C) 2001 Russell King
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * We keep the old params compatibility cruft in one place (here)
+ * so we don't end up with lots of mess around other places.
+ *
+ * NOTE:
+ *  The old struct param_struct is deprecated, but it will be kept in
+ *  the kernel for 5 years from now (2001). This will allow boot loaders
+ *  to convert to the new struct tag way.
+ */
 #include <linux/types.h>
 #include <linux/kernel.h>
 #include <linux/string.h>
@@ -12,7 +28,17 @@
 
 #include "atags.h"
 
-
+/*
+ * Usage:
+ *  - do not go blindly adding fields, add them at the end
+ *  - when adding fields, don't rely on the address until
+ *    a patch from me has been released
+ *  - unused fields should be zero (for future expansion)
+ *  - this structure is relatively short-lived - only
+ *    guaranteed to contain useful data in setup_arch()
+ *
+ * This is the old deprecated way to pass parameters to the kernel
+ */
 struct param_struct {
     union {
 	struct {

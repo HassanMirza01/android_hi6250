@@ -1,4 +1,10 @@
-
+/*
+ *  linux/arch/alpha/kernel/signal.c
+ *
+ *  Copyright (C) 1995  Linus Torvalds
+ *
+ *  1997-11-02  Modified for POSIX.1b signals by Richard Henderson
+ */
 
 #include <linux/sched.h>
 #include <linux/kernel.h>

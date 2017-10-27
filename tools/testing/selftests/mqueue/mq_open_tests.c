@@ -242,7 +242,11 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	
+	/*
+	 * Although we can create a msg queue with a non-absolute path name,
+	 * unlink will fail.  So, if the name doesn't start with a /, add one
+	 * when we save it.
+	 */
 	if (*argv[1] == '/')
 		queue_path = strdup(argv[1]);
 	else {

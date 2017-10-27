@@ -1,4 +1,24 @@
-
+/*
+ * Low-level CPU initialisation
+ * Based on arch/arm/kernel/head.S
+ *
+ * Copyright (C) 1994-2002 Russell King
+ * Copyright (C) 2003-2012 ARM Ltd.
+ * Authors:	Catalin Marinas <catalin.marinas@arm.com>
+ *		Will Deacon <will.deacon@arm.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include <linux/linkage.h>
 #include <linux/init.h>
@@ -407,9 +427,6 @@ __mmap_switched:
 	str_l	x21, __fdt_pointer, x5		// Save FDT pointer
 	str_l	x24, memstart_addr, x6		// Save PHYS_OFFSET
 	mov	x29, #0
-#ifdef CONFIG_KASAN
-	bl	kasan_early_init
-#endif
 	b	start_kernel
 ENDPROC(__mmap_switched)
 

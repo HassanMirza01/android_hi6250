@@ -1,4 +1,19 @@
-
+/*
+ *  linux/arch/arm/mach-pxa/littleton.c
+ *
+ *  Support for the Marvell Littleton Development Platform.
+ *
+ *  Author:	Jason Chagas (largely modified code)
+ *  Created:	Nov 20, 2006
+ *  Copyright:	(C) Copyright 2006 Marvell International Ltd.
+ *
+ *  2007-11-22  modified to align with latest kernel
+ *              eric miao <eric.miao@marvell.com>
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License version 2 as
+ *  publishhed by the Free Software Foundation.
+ */
 
 #include <linux/init.h>
 #include <linux/interrupt.h>
