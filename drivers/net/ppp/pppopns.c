@@ -192,7 +192,7 @@ static void pppopns_xmit_core(struct work_struct *delivery_work)
 		struct msghdr msg = { 0 };
 
 		iov_iter_kvec(&msg.msg_iter, WRITE | ITER_KVEC, &iov, 1,
-				skb->len);
+			      skb->len);
 		sk_raw->sk_prot->sendmsg(sk_raw, &msg, skb->len);
 		kfree_skb(skb);
 	}
