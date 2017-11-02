@@ -49,7 +49,7 @@ static int sdcardfs_fault(struct vm_area_struct *vma, struct vm_fault *vmf)
 }
 
 static int sdcardfs_page_mkwrite(struct vm_area_struct *vma,
-				 struct vm_fault *vmf)
+			       struct vm_fault *vmf)
 {
 	int err;
 	struct file *file, *lower_file;
@@ -67,14 +67,8 @@ static int sdcardfs_page_mkwrite(struct vm_area_struct *vma,
 	return err;
 }
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 16, 0))
 static ssize_t sdcardfs_direct_IO(struct kiocb *iocb,
 				  const struct iovec *iov, loff_t offset)
-#else
-static ssize_t sdcardfs_direct_IO(int rw, struct kiocb *iocb,
-			      const struct iovec *iov, loff_t offset,
-			      unsigned long nr_segs)
-#endif
 {
 	/*
 	 * This function returns zero on purpose in order to support direct IO.
@@ -98,10 +92,10 @@ static ssize_t sdcardfs_direct_IO(int rw, struct kiocb *iocb,
  */
 const struct address_space_operations sdcardfs_aops = {
 	/* empty on purpose */
-	.direct_IO = sdcardfs_direct_IO,
+	.direct_IO	= sdcardfs_direct_IO,
 };
 
 const struct vm_operations_struct sdcardfs_vm_ops = {
-	.fault = sdcardfs_fault,
-	.page_mkwrite = sdcardfs_page_mkwrite,
+	.fault		= sdcardfs_fault,
+	.page_mkwrite	= sdcardfs_page_mkwrite,
 };

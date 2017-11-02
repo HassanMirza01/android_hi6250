@@ -83,6 +83,7 @@ static int parse_options(struct super_block *sb, char *options, int silent,
 
 	while ((p = strsep(&options, ",")) != NULL) {
 		int token;
+
 		if (!*p)
 			continue;
 
@@ -161,7 +162,7 @@ static int parse_options(struct super_block *sb, char *options, int silent,
 				opts->mask = 0007;
 			break;
 
-			/* unknown option */
+		/* unknown option */
 		default:
 invalid_option:
 			if (!silent) {
@@ -408,7 +409,7 @@ static struct dentry *mount_nodev_with_options(struct file_system_type *fs_type,
 }
 
 struct dentry *sdcardfs_mount(struct file_system_type *fs_type, int flags,
-			      const char *dev_name, void *raw_data)
+			    const char *dev_name, void *raw_data)
 {
 	/*
 	 * dev_name is a lower_path_name,
@@ -419,11 +420,11 @@ struct dentry *sdcardfs_mount(struct file_system_type *fs_type, int flags,
 }
 
 static struct file_system_type sdcardfs_fs_type = {
-	.owner = THIS_MODULE,
-	.name = SDCARDFS_NAME,
-	.mount = sdcardfs_mount,
-	.kill_sb = generic_shutdown_super,
-	.fs_flags = 0,
+	.owner		= THIS_MODULE,
+	.name		= SDCARDFS_NAME,
+	.mount		= sdcardfs_mount,
+	.kill_sb	= generic_shutdown_super,
+	.fs_flags	= 0,
 };
 
 static int __init init_sdcardfs_fs(void)
@@ -460,8 +461,7 @@ static void __exit exit_sdcardfs_fs(void)
 	pr_info("Completed sdcardfs module unload\n");
 }
 
-MODULE_AUTHOR("Woojoong Lee, Daeho Jeong, Kitae Lee, Yeongjin Gil"
-	      " System Memory Lab., Samsung Electronics");
+MODULE_AUTHOR("Woojoong Lee, Daeho Jeong, Kitae Lee, Yeongjin Gil System Memory Lab., Samsung Electronics");
 MODULE_DESCRIPTION("Sdcardfs " SDCARDFS_VERSION);
 MODULE_LICENSE("GPL");
 

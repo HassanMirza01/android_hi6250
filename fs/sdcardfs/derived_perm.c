@@ -35,8 +35,8 @@ static void inherit_derived_state(struct inode *parent, struct inode *child)
 }
 
 /* helper function for derived state */
-void setup_derived_state(struct inode *inode, perm_t perm,
-			 userid_t userid, uid_t uid, gid_t gid, mode_t mode)
+void setup_derived_state(struct inode *inode, perm_t perm, userid_t userid,
+						uid_t uid, gid_t gid, mode_t mode)
 {
 	struct sdcardfs_inode_info *info = SDCARDFS_I(inode);
 
@@ -155,9 +155,7 @@ inline void update_derived_permission(struct dentry *dentry)
 	 * 1. need to check whether the dentry is updated or not
 	 * 2. remove the root dentry update
 	 */
-	if (IS_ROOT(dentry)) {
-		/* setup_default_pre_root_state(dentry->d_inode); */
-	} else {
+	if (!IS_ROOT(dentry)) {
 		parent = dget_parent(dentry);
 		if (parent) {
 			get_derived_permission(parent, dentry);
@@ -196,14 +194,14 @@ int is_obbpath_invalid(struct dentry *dent)
 
 	/* check the base obbpath has been changed.
 	 * this routine can check an uninitialized obb dentry as well.
-	 * regarding the uninitialized obb, refer to the sdcardfs_mkdir() */
+	 * regarding the uninitialized obb, refer to the sdcardfs_mkdir()
+	 */
 	spin_lock(&di->lock);
 	if (di->orig_path.dentry) {
 		if (!di->lower_path.dentry) {
 			ret = 1;
 		} else {
 			path_get(&di->lower_path);
-			/* lower_parent = lock_parent(lower_path->dentry); */
 
 			path_buf = kmalloc(PATH_MAX, GFP_ATOMIC);
 			if (!path_buf) {
@@ -219,7 +217,6 @@ int is_obbpath_invalid(struct dentry *dent)
 				kfree(path_buf);
 			}
 
-			/* unlock_dir(lower_parent); */
 			path_put(&di->lower_path);
 		}
 	}
@@ -256,7 +253,8 @@ int is_base_obbpath(struct dentry *dentry)
 /* The lower_path will be stored to the dentry's orig_path
  * and the base obbpath will be copyed to the lower_path variable.
  * if an error returned, there's no change in the lower_path
- * returns: -ERRNO if error (0: no error) */
+ * returns: -ERRNO if error (0: no error)
+ */
 int setup_obb_dentry(struct dentry *dentry, struct path *lower_path)
 {
 	int err = 0;
@@ -265,7 +263,8 @@ int setup_obb_dentry(struct dentry *dentry, struct path *lower_path)
 
 	/* A local obb dentry must have its own orig_path to support rmdir
 	 * and mkdir of itself. Usually, we expect that the sbi->obbpath
-	 * is avaiable on this stage. */
+	 * is avaiable on this stage.
+	 */
 	sdcardfs_set_orig_path(dentry, lower_path);
 
 	err = kern_path(sbi->obbpath_s,

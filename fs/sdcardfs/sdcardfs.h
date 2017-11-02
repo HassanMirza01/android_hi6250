@@ -251,7 +251,6 @@ struct sdcardfs_sb_info {
 	char *devpath;
 };
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 12, 0))
 /* Kernel uid/gid conversion. These are used to convert to/from the on disk
  * uid_t/gid_t types to the kuid_t/kgid_t types that the kernel uses internally.
  * The conversion here is type only, the value will remain the same since we
@@ -277,27 +276,6 @@ static inline kgid_t xfs_gid_to_kgid(__uint32_t gid)
 {
 	return make_kgid(&init_user_ns, gid);
 }
-#else
-static inline __uint32_t xfs_kuid_to_uid(kuid_t uid)
-{
-	return uid;
-}
-
-static inline kuid_t xfs_uid_to_kuid(__uint32_t uid)
-{
-	return uid;
-}
-
-static inline __uint32_t xfs_kgid_to_gid(kgid_t gid)
-{
-	return gid;
-}
-
-static inline kgid_t xfs_gid_to_kgid(__uint32_t gid)
-{
-	return gid;
-}
-#endif
 
 /*
  * inode to private data
@@ -357,14 +335,14 @@ static inline void sdcardfs_copy_inode_attr(struct inode *dest,
 }
 
 /* superblock to lower superblock */
-static inline struct super_block *sdcardfs_lower_super(const struct super_block
-						       *sb)
+static inline struct super_block *sdcardfs_lower_super(
+	const struct super_block *sb)
 {
 	return SDCARDFS_SB(sb)->lower_sb;
 }
 
 static inline void sdcardfs_set_lower_super(struct super_block *sb,
-					    struct super_block *val)
+					  struct super_block *val)
 {
 	SDCARDFS_SB(sb)->lower_sb = val;
 }
@@ -427,7 +405,7 @@ static inline void sdcardfs_put_reset_##pname(const struct dentry *dent) \
 }
 
 SDCARDFS_DENT_FUNC(lower_path)
-    SDCARDFS_DENT_FUNC(orig_path)
+SDCARDFS_DENT_FUNC(orig_path)
 
 static inline void sdcardfs_copy_lower_path(const struct dentry *dent,
 					    struct path *lower_path)
@@ -451,7 +429,7 @@ static inline int has_graft_path(const struct dentry *dent)
 }
 
 static inline void sdcardfs_get_real_lower(const struct dentry *dent,
-					   struct path *real_lower)
+						struct path *real_lower)
 {
 	/* in case of a local obb dentry
 	 * the orig_path should be returned
@@ -463,7 +441,7 @@ static inline void sdcardfs_get_real_lower(const struct dentry *dent,
 }
 
 static inline void sdcardfs_put_real_lower(const struct dentry *dent,
-					   struct path *real_lower)
+						struct path *real_lower)
 {
 	if (has_graft_path(dent))
 		sdcardfs_put_orig_path(dent, real_lower);
@@ -474,6 +452,7 @@ static inline void sdcardfs_put_real_lower(const struct dentry *dent,
 void sdcardfs_drop_shared_icache(struct super_block *, struct super_block *, unsigned long);
 void sdcardfs_drop_sb_icache(struct super_block *, unsigned long);
 void sdcardfs_add_super(struct sdcardfs_sb_info *, struct super_block *);
+
 /* for packagelist.c */
 extern int get_caller_has_rw_locked(void *pkgl_id, derive_t derive);
 extern appid_t get_appid(void *pkgl_id, const char *app_name);
@@ -512,16 +491,13 @@ static inline void unlock_dir(struct dentry *dir)
 	dput(dir);
 }
 
-static inline int prepare_dir(const char *path_s, uid_t uid, gid_t gid,
-			      mode_t mode)
+static inline int prepare_dir(const char *path_s, uid_t uid, gid_t gid, mode_t mode)
 {
 	int err;
 	struct dentry *dent;
 	struct path path;
 	struct iattr attrs;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0))
 	struct inode *delegated_inode = NULL;
-#endif
 
 	dent = kern_path_create(AT_FDCWD, path_s, &path, LOOKUP_DIRECTORY);
 
@@ -546,7 +522,6 @@ static inline int prepare_dir(const char *path_s, uid_t uid, gid_t gid,
 	attrs.ia_uid = xfs_uid_to_kuid(uid);
 	attrs.ia_gid = xfs_gid_to_kgid(gid);
 	attrs.ia_valid = ATTR_UID | ATTR_GID;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0))
 retry_deleg:
 	mutex_lock(&dent->d_inode->i_mutex);
 	err = notify_change(dent, &attrs, &delegated_inode);
@@ -556,11 +531,6 @@ retry_deleg:
 		if (!err)
 			goto retry_deleg;
 	}
-#else
-	mutex_lock(&dent->d_inode->i_mutex);
-	notify_change(dent, &attrs);
-	mutex_unlock(&dent->d_inode->i_mutex);
-#endif
 
 out_drop:
 	mnt_drop_write(path.mnt);
@@ -622,8 +592,7 @@ static inline void fix_derived_permission(struct inode *x)
  * Return 1, if a disk has enough free space, otherwise 0.
  * We assume that any files can not be overwritten.
  */
-static inline int check_min_free_space(struct dentry *dentry, size_t size,
-				       int dir)
+static inline int check_min_free_space(struct dentry *dentry, size_t size, int dir)
 {
 	int err;
 	struct path lower_path;
@@ -652,7 +621,7 @@ static inline int check_min_free_space(struct dentry *dentry, size_t size,
 		avail = statfs.f_bavail * statfs.f_bsize;
 
 		/* not enough space */
-		if ((u64) size > avail)
+		if ((u64)size > avail)
 			goto out_nospc;
 
 		/* enough space */
@@ -687,4 +656,4 @@ out_nospc:
 	return 0;
 }
 
-#endif /* not _SDCARDFS_H_ */
+#endif	/* not _SDCARDFS_H_ */

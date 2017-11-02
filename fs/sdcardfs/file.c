@@ -1,4 +1,22 @@
-
+/*
+ * fs/sdcardfs/file.c
+ *
+ * Copyright (c) 2013 Samsung Electronics Co. Ltd
+ *   Authors: Daeho Jeong, Woojoong Lee, Seunghwan Hyun,
+ *               Sunghwan Yun, Sungjong Seo
+ *
+ * This program has been developed as a stackable file system based on
+ * the WrapFS which written by
+ *
+ * Copyright (c) 1998-2011 Erez Zadok
+ * Copyright (c) 2009     Shrikar Archak
+ * Copyright (c) 2003-2011 Stony Brook University
+ * Copyright (c) 2003-2011 The Research Foundation of SUNY
+ *
+ * This file is dual licensed.  It may be redistributed and/or modified
+ * under the terms of the Apache 2.0 License OR version 2 of the GNU
+ * General Public License.
+ */
 
 #include "sdcardfs.h"
 #include <linux/uio.h>
@@ -7,7 +25,7 @@
 #endif
 
 static ssize_t sdcardfs_read(struct file *file, char __user *buf,
-			     size_t count, loff_t *ppos)
+			   size_t count, loff_t *ppos)
 {
 	int err;
 	struct file *lower_file;
@@ -130,12 +148,7 @@ static ssize_t sdcardfs_write(struct file *file, const char __user *buf,
 	return err;
 }
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 11, 0))
 static int sdcardfs_readdir(struct file *file, struct dir_context *ctx)
-#else
-static int sdcardfs_readdir(struct file *file, void *dirent,
-			filldir_t filldir)
-#endif
 {
 	int err = 0;
 	struct file *lower_file = NULL;
@@ -144,11 +157,7 @@ static int sdcardfs_readdir(struct file *file, void *dirent,
 	lower_file = sdcardfs_lower_file(file);
 
 	lower_file->f_pos = file->f_pos;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 11, 0))
 	err = iterate_dir(lower_file, ctx);
-#else
-	err = vfs_readdir(lower_file, filldir, dirent);
-#endif
 	file->f_pos = lower_file->f_pos;
 	if (err >= 0)		/* copy the atime */
 		fsstack_copy_attr_atime(dentry->d_inode,
@@ -157,7 +166,7 @@ static int sdcardfs_readdir(struct file *file, void *dirent,
 }
 
 static long sdcardfs_unlocked_ioctl(struct file *file, unsigned int cmd,
-				    unsigned long arg)
+				  unsigned long arg)
 {
 	long err = -ENOTTY;
 	struct file *lower_file;
@@ -176,7 +185,7 @@ out:
 
 #ifdef CONFIG_COMPAT
 static long sdcardfs_compat_ioctl(struct file *file, unsigned int cmd,
-				  unsigned long arg)
+				unsigned long arg)
 {
 	long err = -ENOTTY;
 	struct file *lower_file;
@@ -286,7 +295,7 @@ static int sdcardfs_open(struct inode *inode, struct file *file)
 
 	file->f_mode |= FMODE_NOMAPPABLE;
 	file->private_data =
-	    kzalloc(sizeof(struct sdcardfs_file_info), GFP_KERNEL);
+		kzalloc(sizeof(struct sdcardfs_file_info), GFP_KERNEL);
 	if (!SDCARDFS_F(file)) {
 		err = -ENOMEM;
 		goto out_revert_cred;
@@ -300,7 +309,7 @@ static int sdcardfs_open(struct inode *inode, struct file *file)
 		lower_file = sdcardfs_lower_file(file);
 		if (lower_file) {
 			sdcardfs_set_lower_file(file, NULL);
-			fput(lower_file);	/* fput calls dput for lower_dentry */
+			fput(lower_file); /* fput calls dput for lower_dentry */
 		}
 	} else {
 		sdcardfs_set_lower_file(file, lower_file);
@@ -349,8 +358,8 @@ static int sdcardfs_file_release(struct inode *inode, struct file *file)
 	return 0;
 }
 
-static int
-sdcardfs_fsync(struct file *file, loff_t start, loff_t end, int datasync)
+static int sdcardfs_fsync(struct file *file, loff_t start, loff_t end,
+			int datasync)
 {
 	int err;
 	struct file *lower_file;
@@ -383,41 +392,37 @@ static struct file *sdcardfs_get_lower_file(struct file *f)
 }
 
 const struct file_operations sdcardfs_main_fops = {
-	.llseek = generic_file_llseek,
-	.read = sdcardfs_read,
-	.write = sdcardfs_write,
-	.read_iter = sdcardfs_read_iter,
-	.write_iter = sdcardfs_write_iter,
-	.unlocked_ioctl = sdcardfs_unlocked_ioctl,
+	.llseek		= generic_file_llseek,
+	.read		= sdcardfs_read,
+	.write		= sdcardfs_write,
+	.unlocked_ioctl	= sdcardfs_unlocked_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl = sdcardfs_compat_ioctl,
+	.compat_ioctl	= sdcardfs_compat_ioctl,
 #endif
-	.mmap = sdcardfs_mmap,
-	.open = sdcardfs_open,
-	.flush = sdcardfs_flush,
-	.release = sdcardfs_file_release,
-	.fsync = sdcardfs_fsync,
-	.fasync = sdcardfs_fasync,
-	.get_lower_file = sdcardfs_get_lower_file,
+	.mmap		= sdcardfs_mmap,
+	.open		= sdcardfs_open,
+	.flush		= sdcardfs_flush,
+	.release	= sdcardfs_file_release,
+	.fsync		= sdcardfs_fsync,
+	.fasync		= sdcardfs_fasync,
+	.read_iter	= sdcardfs_read_iter,
+	.write_iter	= sdcardfs_write_iter,
+	.get_lower_file	= sdcardfs_get_lower_file,
 };
 
 /* trimmed directory options */
 const struct file_operations sdcardfs_dir_fops = {
-	.llseek = generic_file_llseek,
-	.read = generic_read_dir,
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 11, 0))
-	.iterate = sdcardfs_readdir,
-#else
-	.readdir	= sdcardfs_readdir,
-#endif
-	.unlocked_ioctl = sdcardfs_unlocked_ioctl,
+	.llseek		= generic_file_llseek,
+	.read		= generic_read_dir,
+	.iterate	= sdcardfs_readdir,
+	.unlocked_ioctl	= sdcardfs_unlocked_ioctl,
 #ifdef CONFIG_COMPAT
-	.compat_ioctl = sdcardfs_compat_ioctl,
+	.compat_ioctl	= sdcardfs_compat_ioctl,
 #endif
-	.open = sdcardfs_open,
-	.release = sdcardfs_file_release,
-	.flush = sdcardfs_flush,
-	.fsync = sdcardfs_fsync,
-	.fasync = sdcardfs_fasync,
-	.get_lower_file = sdcardfs_get_lower_file,
+	.open		= sdcardfs_open,
+	.release	= sdcardfs_file_release,
+	.flush		= sdcardfs_flush,
+	.fsync		= sdcardfs_fsync,
+	.fasync		= sdcardfs_fasync,
+	.get_lower_file	= sdcardfs_get_lower_file,
 };

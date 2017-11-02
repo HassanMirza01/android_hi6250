@@ -1,4 +1,22 @@
-
+/*
+ * fs/sdcardfs/inode.c
+ *
+ * Copyright (c) 2013 Samsung Electronics Co. Ltd
+ *   Authors: Daeho Jeong, Woojoong Lee, Seunghwan Hyun,
+ *               Sunghwan Yun, Sungjong Seo
+ *
+ * This program has been developed as a stackable file system based on
+ * the WrapFS which written by
+ *
+ * Copyright (c) 1998-2011 Erez Zadok
+ * Copyright (c) 2009     Shrikar Archak
+ * Copyright (c) 2003-2011 Stony Brook University
+ * Copyright (c) 2003-2011 The Research Foundation of SUNY
+ *
+ * This file is dual licensed.  It may be redistributed and/or modified
+ * under the terms of the Apache 2.0 License OR version 2 of the GNU
+ * General Public License.
+ */
 
 #include "sdcardfs.h"
 #include <linux/fsnotify.h>
@@ -32,7 +50,7 @@ void revert_fsids(const struct cred *old_cred)
 }
 
 static int sdcardfs_create(struct inode *dir, struct dentry *dentry,
-			   umode_t mode, bool excl)
+			 umode_t mode, bool excl)
 {
 	int err = 0;
 	struct dentry *lower_dentry;
@@ -42,9 +60,7 @@ static int sdcardfs_create(struct inode *dir, struct dentry *dentry,
 	const struct cred *saved_cred = NULL;
 	struct iattr newattrs;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0))
 	struct inode *delegated_inode = NULL;
-#endif
 
 	int has_rw = get_caller_has_rw_locked(sbi->pkgl_id, sbi->options.derive);
 	if (!check_caller_access_to_name(dir, dentry->d_name.name, sbi->options.derive, 1, has_rw)) {
@@ -72,7 +88,6 @@ static int sdcardfs_create(struct inode *dir, struct dentry *dentry,
 	if (err)
 		goto out;
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0))
 retry_deleg:
 	mutex_lock(&lower_dentry->d_inode->i_mutex);
 	newattrs.ia_mode = (mode & S_IALLUGO) | (lower_dentry->d_inode->i_mode & ~S_IALLUGO);
@@ -84,13 +99,6 @@ retry_deleg:
 		if (!err)
 			goto retry_deleg;
 	}
-#else
-	mutex_lock(&lower_dentry->d_inode->i_mutex);
-	newattrs.ia_mode = (mode & S_IALLUGO) | (lower_dentry->d_inode->i_mode & ~S_IALLUGO);
-	newattrs.ia_valid = ATTR_MODE | ATTR_CTIME;
-	notify_change(lower_dentry, &newattrs);
-	mutex_unlock(&lower_dentry->d_inode->i_mutex);
-#endif
 
 	err = sdcardfs_interpose(dentry, dir->i_sb, &lower_path, SDCARDFS_I(dir)->userid);
 	if (err)
@@ -121,7 +129,7 @@ out_eacces:
 
 #if 0
 static int sdcardfs_link(struct dentry *old_dentry, struct inode *dir,
-			 struct dentry *new_dentry)
+		       struct dentry *new_dentry)
 {
 	struct dentry *lower_old_dentry;
 	struct dentry *lower_new_dentry;
@@ -203,11 +211,7 @@ static int sdcardfs_unlink(struct inode *dir, struct dentry *dentry)
 	err = mnt_want_write(lower_path.mnt);
 	if (err)
 		goto out_unlock;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0))
 	err = vfs_unlink(lower_dir_inode, lower_dentry, NULL);
-#else
-	err = vfs_unlink(lower_dir_inode, lower_dentry);
-#endif
 
 	/*
 	 * Note: unlinking on top of NFS can cause silly-renamed files.
@@ -343,9 +347,7 @@ static int sdcardfs_mkdir(struct inode *dir, struct dentry *dentry,
 	int fullpath_namelen;
 	int touch_err = 0;
 	struct iattr newattrs;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0))
 	struct inode *delegated_inode = NULL;
-#endif
 
 	int has_rw = get_caller_has_rw_locked(sbi->pkgl_id, sbi->options.derive);
 
@@ -388,7 +390,6 @@ static int sdcardfs_mkdir(struct inode *dir, struct dentry *dentry,
 	}
 
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0))
 retry_deleg:
 	mutex_lock(&lower_dentry->d_inode->i_mutex);
 	newattrs.ia_mode = (mode & S_IALLUGO) | (lower_dentry->d_inode->i_mode & ~S_IALLUGO);
@@ -400,13 +401,6 @@ retry_deleg:
 		if (!err)
 			goto retry_deleg;
 	}
-#else
-	mutex_lock(&lower_dentry->d_inode->i_mutex);
-	newattrs.ia_mode = (mode & S_IALLUGO) | (lower_dentry->d_inode->i_mode & ~S_IALLUGO);
-	newattrs.ia_valid = ATTR_MODE | ATTR_CTIME;
-	err = notify_change(lower_dentry, &newattrs);
-	mutex_unlock(&lower_dentry->d_inode->i_mutex);
-#endif
 
 	/* if it is a local obb dentry, setup it with the base obbpath */
 	if (need_graft_path(dentry)) {
@@ -663,14 +657,9 @@ static int sdcardfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	err = mnt_want_write(lower_new_path.mnt);
 	if (err)
 		goto out_drop_old_write;
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0))
 	err = vfs_rename(lower_old_dir_dentry->d_inode, lower_old_dentry,
 			 lower_new_dir_dentry->d_inode, lower_new_dentry,
 			 NULL, 0);
-#else
-	err = vfs_rename(lower_old_dir_dentry->d_inode, lower_old_dentry,
-			 lower_new_dir_dentry->d_inode, lower_new_dentry);
-#endif
 
 	if (err)
 		goto out_err;
@@ -712,8 +701,7 @@ out_eacces:
 }
 
 #if 0
-static int sdcardfs_readlink(struct dentry *dentry, char __user *buf,
-			     int bufsiz)
+static int sdcardfs_readlink(struct dentry *dentry, char __user *buf, int bufsiz)
 {
 	int err;
 	struct dentry *lower_dentry;
@@ -969,11 +957,7 @@ static int sdcardfs_setattr(struct dentry *dentry, struct iattr *ia)
 	 * tries to open(), unlink(), then ftruncate() a file.
 	 */
 	mutex_lock(&lower_dentry->d_inode->i_mutex);
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 13, 0))
 	err = notify_change(lower_dentry, &lower_ia, NULL);	/* note: lower_ia */
-#else
-	err = notify_change(lower_dentry, &lower_ia);	/* note: lower_ia */
-#endif
 	mutex_unlock(&lower_dentry->d_inode->i_mutex);
 	if (err)
 		goto out;
@@ -1002,56 +986,56 @@ out_err:
 }
 
 const struct inode_operations sdcardfs_symlink_iops = {
-	.permission = sdcardfs_permission,
-	.setattr = sdcardfs_setattr,
+	.permission	= sdcardfs_permission,
+	.setattr	= sdcardfs_setattr,
 #ifdef SDCARD_FS_XATTR
-	.setxattr = sdcardfs_setxattr,
-	.getxattr = sdcardfs_getxattr,
-	.listxattr = sdcardfs_listxattr,
-	.removexattr = sdcardfs_removexattr,
+	.setxattr	= sdcardfs_setxattr,
+	.getxattr	= sdcardfs_getxattr,
+	.listxattr	= sdcardfs_listxattr,
+	.removexattr	= sdcardfs_removexattr,
 #endif
 	/* XXX Following operations are implemented,
 	 *     but FUSE(sdcard) or FAT does not support them
 	 *     These methods are *NOT* perfectly tested.
-	 .readlink      = sdcardfs_readlink,
-	 .follow_link   = sdcardfs_follow_link,
-	 .put_link      = sdcardfs_put_link,
+	.readlink	= sdcardfs_readlink,
+	.follow_link	= sdcardfs_follow_link,
+	.put_link	= sdcardfs_put_link,
 	 */
 };
 
 const struct inode_operations sdcardfs_dir_iops = {
-	.create = sdcardfs_create,
-	.lookup = sdcardfs_lookup,
-	.permission = sdcardfs_permission,
-	.unlink = sdcardfs_unlink,
-	.mkdir = sdcardfs_mkdir,
-	.rmdir = sdcardfs_rmdir,
-	.rename = sdcardfs_rename,
-	.setattr = sdcardfs_setattr,
-	.getattr = sdcardfs_getattr,
+	.create		= sdcardfs_create,
+	.lookup		= sdcardfs_lookup,
+	.permission	= sdcardfs_permission,
+	.unlink		= sdcardfs_unlink,
+	.mkdir		= sdcardfs_mkdir,
+	.rmdir		= sdcardfs_rmdir,
+	.rename		= sdcardfs_rename,
+	.setattr	= sdcardfs_setattr,
+	.getattr	= sdcardfs_getattr,
 #ifdef SDCARD_FS_XATTR
-	.setxattr = sdcardfs_setxattr,
-	.getxattr = sdcardfs_getxattr,
-	.listxattr = sdcardfs_listxattr,
-	.removexattr = sdcardfs_removexattr,
+	.setxattr	= sdcardfs_setxattr,
+	.getxattr	= sdcardfs_getxattr,
+	.listxattr	= sdcardfs_listxattr,
+	.removexattr	= sdcardfs_removexattr,
 #endif
 	/* XXX Following operations are implemented,
 	 *     but FUSE(sdcard) or FAT does not support them
 	 *     These methods are *NOT* perfectly tested.
-	 .symlink       = sdcardfs_symlink,
-	 .link          = sdcardfs_link,
-	 .mknod         = sdcardfs_mknod,
+	.symlink	= sdcardfs_symlink,
+	.link		= sdcardfs_link,
+	.mknod		= sdcardfs_mknod,
 	 */
 };
 
 const struct inode_operations sdcardfs_main_iops = {
-	.permission = sdcardfs_permission,
-	.setattr = sdcardfs_setattr,
-	.getattr = sdcardfs_getattr,
+	.permission	= sdcardfs_permission,
+	.setattr	= sdcardfs_setattr,
+	.getattr	= sdcardfs_getattr,
 #ifdef SDCARD_FS_XATTR
-	.setxattr = sdcardfs_setxattr,
-	.getxattr = sdcardfs_getxattr,
-	.listxattr = sdcardfs_listxattr,
-	.removexattr = sdcardfs_removexattr,
+	.setxattr	= sdcardfs_setxattr,
+	.getxattr	= sdcardfs_getxattr,
+	.listxattr	= sdcardfs_listxattr,
+	.removexattr	= sdcardfs_removexattr,
 #endif
 };
