@@ -930,7 +930,9 @@ static int f_midi_bind(struct usb_configuration *c, struct usb_function *f)
 #endif
 
 	kfree(midi_function);
+#ifdef CONFIG_HISI_USB_FUNC_ADD_SS_DESC
 	kfree(midi_function_ss);
+#endif
 
 	return 0;
 
