@@ -465,7 +465,6 @@ int verity_fec_decode(struct dm_verity *v, struct dm_verity_io *io,
 	offset = block << v->data_dev_block_bits;
 	res = div64_u64(offset, v->fec->rounds << v->data_dev_block_bits);
 
-
 	/*
 	 * The base RS block we can feed to the interleaver to find out all
 	 * blocks required for decoding.
@@ -490,6 +489,7 @@ int verity_fec_decode(struct dm_verity *v, struct dm_verity_io *io,
 		fio->output_pos = 0;
 		r = verity_for_bv_block(v, io, iter, fec_bv_copy);
 	}
+
 done:
 	fio->level--;
 	return r;

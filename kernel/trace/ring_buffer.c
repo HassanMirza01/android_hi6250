@@ -735,7 +735,74 @@ void ring_buffer_normalize_time_stamp(struct ring_buffer *buffer,
 }
 EXPORT_SYMBOL_GPL(ring_buffer_normalize_time_stamp);
 
-
+/*
+ * Making the ring buffer lockless makes things tricky.
+ * Although writes only happen on the CPU that they are on,
+ * and they only need to worry about interrupts. Reads can
+ * happen on any CPU.
+ *
+ * The reader page is always off the ring buffer, but when the
+ * reader finishes with a page, it needs to swap its page with
+ * a new one from the buffer. The reader needs to take from
+ * the head (writes go to the tail). But if a writer is in overwrite
+ * mode and wraps, it must push the head page forward.
+ *
+ * Here lies the problem.
+ *
+ * The reader must be careful to replace only the head page, and
+ * not another one. As described at the top of the file in the
+ * ASCII art, the reader sets its old page to point to the next
+ * page after head. It then sets the page after head to point to
+ * the old reader page. But if the writer moves the head page
+ * during this operation, the reader could end up with the tail.
+ *
+ * We use cmpxchg to help prevent this race. We also do something
+ * special with the page before head. We set the LSB to 1.
+ *
+ * When the writer must push the page forward, it will clear the
+ * bit that points to the head page, move the head, and then set
+ * the bit that points to the new head page.
+ *
+ * We also don't want an interrupt coming in and moving the head
+ * page on another writer. Thus we use the second LSB to catch
+ * that too. Thus:
+ *
+ * head->list->prev->next        bit 1          bit 0
+ *                              -------        -------
+ * Normal page                     0              0
+ * Points to head page             0              1
+ * New head page                   1              0
+ *
+ * Note we can not trust the prev pointer of the head page, because:
+ *
+ * +----+       +-----+        +-----+
+ * |    |------>|  T  |---X--->|  N  |
+ * |    |<------|     |        |     |
+ * +----+       +-----+        +-----+
+ *   ^                           ^ |
+ *   |          +-----+          | |
+ *   +----------|  R  |----------+ |
+ *              |     |<-----------+
+ *              +-----+
+ *
+ * Key:  ---X-->  HEAD flag set in pointer
+ *         T      Tail page
+ *         R      Reader page
+ *         N      Next page
+ *
+ * (see __rb_reserve_next() to see where this happens)
+ *
+ *  What the above shows is that the reader just swapped out
+ *  the reader page with a page in the buffer, but before it
+ *  could make the new header point back to the new page added
+ *  it was preempted by a writer. The writer moved forward onto
+ *  the new page added by the reader and is about to move forward
+ *  again.
+ *
+ *  You can see, it is legitimate for the previous pointer of
+ *  the head (or any page) not to point back to itself. But only
+ *  temporarially.
+ */
 
 #define RB_PAGE_NORMAL		0UL
 #define RB_PAGE_HEAD		1UL
@@ -1975,7 +2042,10 @@ rb_update_event(struct ring_buffer_per_cpu *cpu_buffer,
 	if (unlikely(!rb_event_is_commit(cpu_buffer, event)))
 		delta = 0;
 
-	
+	/*
+	 * If we need to add a timestamp, then we
+	 * add it to the start of the resevered space.
+	 */
 	if (unlikely(add_timestamp)) {
 		event = rb_add_time_stamp(event, delta);
 		length -= RB_LEN_TIME_EXTEND;
