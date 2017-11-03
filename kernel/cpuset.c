@@ -247,7 +247,41 @@ static struct cpuset top_cpuset = {
 	css_for_each_descendant_pre((pos_css), &(root_cs)->css)		\
 		if (is_cpuset_online(((des_cs) = css_cs((pos_css)))))
 
-
+/*
+ * There are two global locks guarding cpuset structures - cpuset_mutex and
+ * callback_lock. We also require taking task_lock() when dereferencing a
+ * task's cpuset pointer. See "The task_lock() exception", at the end of this
+ * comment.
+ *
+ * A task must hold both locks to modify cpusets.  If a task holds
+ * cpuset_mutex, then it blocks others wanting that mutex, ensuring that it
+ * is the only task able to also acquire callback_lock and be able to
+ * modify cpusets.  It can perform various checks on the cpuset structure
+ * first, knowing nothing will change.  It can also allocate memory while
+ * just holding cpuset_mutex.  While it is performing these checks, various
+ * callback routines can briefly acquire callback_lock to query cpusets.
+ * Once it is ready to make the changes, it takes callback_lock, blocking
+ * everyone else.
+ *
+ * Calls to the kernel memory allocator can not be made while holding
+ * callback_lock, as that would risk double tripping on callback_lock
+ * from one of the callbacks into the cpuset code from within
+ * __alloc_pages().
+ *
+ * If a task is only holding callback_lock, then it has read-only
+ * access to cpusets.
+ *
+ * Now, the task_struct fields mems_allowed and mempolicy may be changed
+ * by other task, we use alloc_lock in the task_struct fields to protect
+ * them.
+ *
+ * The cpuset_common_file_read() handlers only hold callback_lock across
+ * small pieces of code, such as when reading out possibly multi-word
+ * cpumasks and nodemasks.
+ *
+ * Accessing a task's cpuset should be done in accordance with the
+ * guidelines for accessing subsystem state in kernel/cgroup.c
+ */
 
 static DEFINE_MUTEX(cpuset_mutex);
 static DEFINE_SPINLOCK(callback_lock);
