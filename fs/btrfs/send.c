@@ -1,4 +1,20 @@
-
+/*
+ * Copyright (C) 2012 Alexander Block.  All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License v2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 021110-1307, USA.
+ */
 
 #include <linux/bsearch.h>
 #include <linux/fs.h>
@@ -1402,7 +1418,12 @@ verbose_printk(KERN_DEBUG "btrfs: find_extent_clone: data_offset=%llu, "
 
 	if (cur_clone_root) {
 		if (compressed != BTRFS_COMPRESS_NONE) {
-			
+			/*
+			 * Offsets given by iterate_extent_inodes() are relative
+			 * to the start of the extent, we need to add logical
+			 * offset from the file extent item.
+			 * (See why at backref.c:check_extent_in_eb())
+			 */
 			cur_clone_root->offset += btrfs_file_extent_offset(eb,
 									   fi);
 		}

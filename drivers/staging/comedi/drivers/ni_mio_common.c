@@ -1,6 +1,56 @@
+/*
+    comedi/drivers/ni_mio_common.c
+    Hardware driver for DAQ-STC based boards
 
+    COMEDI - Linux Control and Measurement Device Interface
+    Copyright (C) 1997-2001 David A. Schleef <ds@schleef.org>
+    Copyright (C) 2002-2006 Frank Mori Hess <fmhess@users.sourceforge.net>
 
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+*/
+
+/*
+	This file is meant to be included by another file, e.g.,
+	ni_atmio.c or ni_pcimio.c.
+
+	Interrupt support originally added by Truxton Fulton
+	<trux@truxton.com>
+
+	References (from ftp://ftp.natinst.com/support/manuals):
+
+	   340747b.pdf  AT-MIO E series Register Level Programmer Manual
+	   341079b.pdf  PCI E Series RLPM
+	   340934b.pdf  DAQ-STC reference manual
+	67xx and 611x registers (from ftp://ftp.ni.com/support/daq/mhddk/documentation/)
+	release_ni611x.pdf
+	release_ni67xx.pdf
+	Other possibly relevant info:
+
+	   320517c.pdf  User manual (obsolete)
+	   320517f.pdf  User manual (new)
+	   320889a.pdf  delete
+	   320906c.pdf  maximum signal ratings
+	   321066a.pdf  about 16x
+	   321791a.pdf  discontinuation of at-mio-16e-10 rev. c
+	   321808a.pdf  about at-mio-16e-10 rev P
+	   321837a.pdf  discontinuation of at-mio-16de-10 rev d
+	   321838a.pdf  about at-mio-16de-10 rev N
+
+	ISSUES:
+
+	 - the interrupt routine needs to be cleaned up
+
+	2006-02-07: S-Series PCI-6143: Support has been added but is not
+		fully tested as yet. Terry Barnaby, BEAM Ltd.
+*/
 
 #include <linux/interrupt.h>
 #include <linux/sched.h>

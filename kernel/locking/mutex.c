@@ -538,6 +538,7 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,
 	debug_mutex_lock_common(lock, &waiter);
 	debug_mutex_add_waiter(lock, &waiter, task_thread_info(task));
 
+	/* add waiting tasks to the end of the waitqueue (FIFO): */
 	list_add_tail(&waiter.list, &lock->wait_list);
 	waiter.task = task;
 

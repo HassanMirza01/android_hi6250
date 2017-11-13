@@ -3774,7 +3774,13 @@ static int ext4_rename(struct inode *old_dir, struct dentry *old_dentry,
 		if (retval)
 			goto end_rename;
 	}
-	
+	/*
+	 * If we're renaming a file within an inline_data dir and adding or
+	 * setting the new dirent causes a conversion from inline_data to
+	 * extents/blockmap, we need to force the dirent delete code to
+	 * re-read the directory, or else we end up trying to delete a dirent
+	 * from what is now the extent tree root (or a block map).
+	 */
 	force_reread = (new.dir->i_ino == old.dir->i_ino &&
 			ext4_test_inode_flag(new.dir, EXT4_INODE_INLINE_DATA));
 

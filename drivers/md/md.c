@@ -1,4 +1,36 @@
+/*
+   md.c : Multiple Devices driver for Linux
+     Copyright (C) 1998, 1999, 2000 Ingo Molnar
 
+     completely rewritten, based on the MD driver code from Marc Zyngier
+
+   Changes:
+
+   - RAID-1/RAID-5 extensions by Miguel de Icaza, Gadi Oxman, Ingo Molnar
+   - RAID-6 extensions by H. Peter Anvin <hpa@zytor.com>
+   - boot support for linear and striped mode by Harald Hoyer <HarryH@Royal.Net>
+   - kerneld support by Boris Tobotras <boris@xtalk.msk.su>
+   - kmod support by: Cyrus Durgin
+   - RAID0 bugfixes: Mark Anthony Lisher <markal@iname.com>
+   - Devfs support by Richard Gooch <rgooch@atnf.csiro.au>
+
+   - lots of fixes and improvements to the RAID1/RAID5 and generic
+     RAID code (such as request based resynchronization):
+
+     Neil Brown <neilb@cse.unsw.edu.au>.
+
+   - persistent bitmap code
+     Copyright (C) 2003-2004, Paul Clements, SteelEye Technology, Inc.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
+   You should have received a copy of the GNU General Public License
+   (for example /usr/src/linux/COPYING); if not, write to the Free
+   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+*/
 
 #include <linux/kthread.h>
 #include <linux/blkdev.h>
@@ -154,7 +186,16 @@ struct bio *bio_clone_mddev(struct bio *bio, gfp_t gfp_mask,
 }
 EXPORT_SYMBOL_GPL(bio_clone_mddev);
 
-
+/*
+ * We have a system wide 'event count' that is incremented
+ * on any 'interesting' event, and readers of /proc/mdstat
+ * can use 'poll' or 'select' to find out when the event
+ * count increases.
+ *
+ * Events are:
+ *  start array, stop array, error, add device, remove device,
+ *  start build, activate spare
+ */
 static DECLARE_WAIT_QUEUE_HEAD(md_event_waiters);
 static atomic_t md_event_count;
 void md_new_event(struct mddev *mddev)
@@ -7692,7 +7733,14 @@ void md_do_sync(struct md_thread *thread)
 				j = rdev->recovery_offset;
 		rcu_read_unlock();
 
-		
+		/* If there is a bitmap, we need to make sure all
+		 * writes that started before we added a spare
+		 * complete before we start doing a recovery.
+		 * Otherwise the write might complete and (via
+		 * bitmap_endwrite) set a bit in the bitmap after the
+		 * recovery has checked that bit and skipped that
+		 * region.
+		 */
 		if (mddev->bitmap) {
 			mddev->pers->quiesce(mddev, 1);
 			mddev->pers->quiesce(mddev, 0);
@@ -8011,7 +8059,28 @@ static void md_start_sync(struct work_struct *ws)
 	md_new_event(mddev);
 }
 
-
+/*
+ * This routine is regularly called by all per-raid-array threads to
+ * deal with generic issues like resync and super-block update.
+ * Raid personalities that don't have a thread (linear/raid0) do not
+ * need this as they never do any recovery or update the superblock.
+ *
+ * It does not do any resync itself, but rather "forks" off other threads
+ * to do that as needed.
+ * When it is determined that resync is needed, we set MD_RECOVERY_RUNNING in
+ * "->recovery" and create a thread at ->sync_thread.
+ * When the thread finishes it sets MD_RECOVERY_DONE
+ * and wakeups up this thread which will reap the thread and finish up.
+ * This thread also removes any faulty devices (with nr_pending == 0).
+ *
+ * The overall approach is:
+ *  1/ if the superblock needs updating, update it.
+ *  2/ If a recovery thread is running, don't do anything else.
+ *  3/ If recovery has finished, clean up, possibly marking spares active.
+ *  4/ If there are any faulty devices, remove them.
+ *  5/ If array is degraded, try to add spares devices
+ *  6/ If array has spares or is not in-sync, start a resync thread.
+ */
 void md_check_recovery(struct mddev *mddev)
 {
 	if (mddev->suspended)

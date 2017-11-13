@@ -1220,7 +1220,10 @@ static void prepare_message_data(struct ceph_msg *msg, u32 data_len)
 	ceph_msg_data_cursor_init(msg, (size_t)data_len);
 }
 
-
+/*
+ * Prepare footer for currently outgoing message, and finish things
+ * off.  Assumes out_kvec* are already valid.. we just add on to the end.
+ */
 static void prepare_write_message_footer(struct ceph_connection *con)
 {
 	struct ceph_msg *m = con->out_msg;

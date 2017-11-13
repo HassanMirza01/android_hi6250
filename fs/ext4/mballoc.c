@@ -1,4 +1,20 @@
-
+/*
+ * Copyright (c) 2003-2006, Cluster File Systems, Inc, info@clusterfs.com
+ * Written by Alex Tomas <alex@clusterfs.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public Licens
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-
+ */
 
 
 /*
@@ -39,9 +55,227 @@ MODULE_PARM_DESC(mballoc_debug, "Debugging level for ext4's mballoc");
  *   - error handling
  */
 
+/*
+ * The allocation request involve request for multiple number of blocks
+ * near to the goal(block) value specified.
+ *
+ * During initialization phase of the allocator we decide to use the
+ * group preallocation or inode preallocation depending on the size of
+ * the file. The size of the file could be the resulting file size we
+ * would have after allocation, or the current file size, which ever
+ * is larger. If the size is less than sbi->s_mb_stream_request we
+ * select to use the group preallocation. The default value of
+ * s_mb_stream_request is 16 blocks. This can also be tuned via
+ * /sys/fs/ext4/<partition>/mb_stream_req. The value is represented in
+ * terms of number of blocks.
+ *
+ * The main motivation for having small file use group preallocation is to
+ * ensure that we have small files closer together on the disk.
+ *
+ * First stage the allocator looks at the inode prealloc list,
+ * ext4_inode_info->i_prealloc_list, which contains list of prealloc
+ * spaces for this particular inode. The inode prealloc space is
+ * represented as:
+ *
+ * pa_lstart -> the logical start block for this prealloc space
+ * pa_pstart -> the physical start block for this prealloc space
+ * pa_len    -> length for this prealloc space (in clusters)
+ * pa_free   ->  free space available in this prealloc space (in clusters)
+ *
+ * The inode preallocation space is used looking at the _logical_ start
+ * block. If only the logical file block falls within the range of prealloc
+ * space we will consume the particular prealloc space. This makes sure that
+ * we have contiguous physical blocks representing the file blocks
+ *
+ * The important thing to be noted in case of inode prealloc space is that
+ * we don't modify the values associated to inode prealloc space except
+ * pa_free.
+ *
+ * If we are not able to find blocks in the inode prealloc space and if we
+ * have the group allocation flag set then we look at the locality group
+ * prealloc space. These are per CPU prealloc list represented as
+ *
+ * ext4_sb_info.s_locality_groups[smp_processor_id()]
+ *
+ * The reason for having a per cpu locality group is to reduce the contention
+ * between CPUs. It is possible to get scheduled at this point.
+ *
+ * The locality group prealloc space is used looking at whether we have
+ * enough free space (pa_free) within the prealloc space.
+ *
+ * If we can't allocate blocks via inode prealloc or/and locality group
+ * prealloc then we look at the buddy cache. The buddy cache is represented
+ * by ext4_sb_info.s_buddy_cache (struct inode) whose file offset gets
+ * mapped to the buddy and bitmap information regarding different
+ * groups. The buddy information is attached to buddy cache inode so that
+ * we can access them through the page cache. The information regarding
+ * each group is loaded via ext4_mb_load_buddy.  The information involve
+ * block bitmap and buddy information. The information are stored in the
+ * inode as:
+ *
+ *  {                        page                        }
+ *  [ group 0 bitmap][ group 0 buddy] [group 1][ group 1]...
+ *
+ *
+ * one block each for bitmap and buddy information.  So for each group we
+ * take up 2 blocks. A page can contain blocks_per_page (PAGE_CACHE_SIZE /
+ * blocksize) blocks.  So it can have information regarding groups_per_page
+ * which is blocks_per_page/2
+ *
+ * The buddy cache inode is not stored on disk. The inode is thrown
+ * away when the filesystem is unmounted.
+ *
+ * We look for count number of blocks in the buddy cache. If we were able
+ * to locate that many free blocks we return with additional information
+ * regarding rest of the contiguous physical block available
+ *
+ * Before allocating blocks via buddy cache we normalize the request
+ * blocks. This ensure we ask for more blocks that we needed. The extra
+ * blocks that we get after allocation is added to the respective prealloc
+ * list. In case of inode preallocation we follow a list of heuristics
+ * based on file size. This can be found in ext4_mb_normalize_request. If
+ * we are doing a group prealloc we try to normalize the request to
+ * sbi->s_mb_group_prealloc.  The default value of s_mb_group_prealloc is
+ * dependent on the cluster size; for non-bigalloc file systems, it is
+ * 512 blocks. This can be tuned via
+ * /sys/fs/ext4/<partition>/mb_group_prealloc. The value is represented in
+ * terms of number of blocks. If we have mounted the file system with -O
+ * stripe=<value> option the group prealloc request is normalized to the
+ * the smallest multiple of the stripe value (sbi->s_stripe) which is
+ * greater than the default mb_group_prealloc.
+ *
+ * The regular allocator (using the buddy cache) supports a few tunables.
+ *
+ * /sys/fs/ext4/<partition>/mb_min_to_scan
+ * /sys/fs/ext4/<partition>/mb_max_to_scan
+ * /sys/fs/ext4/<partition>/mb_order2_req
+ *
+ * The regular allocator uses buddy scan only if the request len is power of
+ * 2 blocks and the order of allocation is >= sbi->s_mb_order2_reqs. The
+ * value of s_mb_order2_reqs can be tuned via
+ * /sys/fs/ext4/<partition>/mb_order2_req.  If the request len is equal to
+ * stripe size (sbi->s_stripe), we try to search for contiguous block in
+ * stripe size. This should result in better allocation on RAID setups. If
+ * not, we search in the specific group using bitmap for best extents. The
+ * tunable min_to_scan and max_to_scan control the behaviour here.
+ * min_to_scan indicate how long the mballoc __must__ look for a best
+ * extent and max_to_scan indicates how long the mballoc __can__ look for a
+ * best extent in the found extents. Searching for the blocks starts with
+ * the group specified as the goal value in allocation context via
+ * ac_g_ex. Each group is first checked based on the criteria whether it
+ * can be used for allocation. ext4_mb_good_group explains how the groups are
+ * checked.
+ *
+ * Both the prealloc space are getting populated as above. So for the first
+ * request we will hit the buddy cache which will result in this prealloc
+ * space getting filled. The prealloc space is then later used for the
+ * subsequent request.
+ */
 
-
-
+/*
+ * mballoc operates on the following data:
+ *  - on-disk bitmap
+ *  - in-core buddy (actually includes buddy and bitmap)
+ *  - preallocation descriptors (PAs)
+ *
+ * there are two types of preallocations:
+ *  - inode
+ *    assiged to specific inode and can be used for this inode only.
+ *    it describes part of inode's space preallocated to specific
+ *    physical blocks. any block from that preallocated can be used
+ *    independent. the descriptor just tracks number of blocks left
+ *    unused. so, before taking some block from descriptor, one must
+ *    make sure corresponded logical block isn't allocated yet. this
+ *    also means that freeing any block within descriptor's range
+ *    must discard all preallocated blocks.
+ *  - locality group
+ *    assigned to specific locality group which does not translate to
+ *    permanent set of inodes: inode can join and leave group. space
+ *    from this type of preallocation can be used for any inode. thus
+ *    it's consumed from the beginning to the end.
+ *
+ * relation between them can be expressed as:
+ *    in-core buddy = on-disk bitmap + preallocation descriptors
+ *
+ * this mean blocks mballoc considers used are:
+ *  - allocated blocks (persistent)
+ *  - preallocated blocks (non-persistent)
+ *
+ * consistency in mballoc world means that at any time a block is either
+ * free or used in ALL structures. notice: "any time" should not be read
+ * literally -- time is discrete and delimited by locks.
+ *
+ *  to keep it simple, we don't use block numbers, instead we count number of
+ *  blocks: how many blocks marked used/free in on-disk bitmap, buddy and PA.
+ *
+ * all operations can be expressed as:
+ *  - init buddy:			buddy = on-disk + PAs
+ *  - new PA:				buddy += N; PA = N
+ *  - use inode PA:			on-disk += N; PA -= N
+ *  - discard inode PA			buddy -= on-disk - PA; PA = 0
+ *  - use locality group PA		on-disk += N; PA -= N
+ *  - discard locality group PA		buddy -= PA; PA = 0
+ *  note: 'buddy -= on-disk - PA' is used to show that on-disk bitmap
+ *        is used in real operation because we can't know actual used
+ *        bits from PA, only from on-disk bitmap
+ *
+ * if we follow this strict logic, then all operations above should be atomic.
+ * given some of them can block, we'd have to use something like semaphores
+ * killing performance on high-end SMP hardware. let's try to relax it using
+ * the following knowledge:
+ *  1) if buddy is referenced, it's already initialized
+ *  2) while block is used in buddy and the buddy is referenced,
+ *     nobody can re-allocate that block
+ *  3) we work on bitmaps and '+' actually means 'set bits'. if on-disk has
+ *     bit set and PA claims same block, it's OK. IOW, one can set bit in
+ *     on-disk bitmap if buddy has same bit set or/and PA covers corresponded
+ *     block
+ *
+ * so, now we're building a concurrency table:
+ *  - init buddy vs.
+ *    - new PA
+ *      blocks for PA are allocated in the buddy, buddy must be referenced
+ *      until PA is linked to allocation group to avoid concurrent buddy init
+ *    - use inode PA
+ *      we need to make sure that either on-disk bitmap or PA has uptodate data
+ *      given (3) we care that PA-=N operation doesn't interfere with init
+ *    - discard inode PA
+ *      the simplest way would be to have buddy initialized by the discard
+ *    - use locality group PA
+ *      again PA-=N must be serialized with init
+ *    - discard locality group PA
+ *      the simplest way would be to have buddy initialized by the discard
+ *  - new PA vs.
+ *    - use inode PA
+ *      i_data_sem serializes them
+ *    - discard inode PA
+ *      discard process must wait until PA isn't used by another process
+ *    - use locality group PA
+ *      some mutex should serialize them
+ *    - discard locality group PA
+ *      discard process must wait until PA isn't used by another process
+ *  - use inode PA
+ *    - use inode PA
+ *      i_data_sem or another mutex should serializes them
+ *    - discard inode PA
+ *      discard process must wait until PA isn't used by another process
+ *    - use locality group PA
+ *      nothing wrong here -- they're different PAs covering different blocks
+ *    - discard locality group PA
+ *      discard process must wait until PA isn't used by another process
+ *
+ * now we're ready to make few consequences:
+ *  - PA is referenced and while it is no discard is possible
+ *  - PA is referenced until block isn't marked in on-disk bitmap
+ *  - PA changes only after on-disk bitmap
+ *  - discard must not compete with init. either init is done before
+ *    any discard or they're serialized somehow
+ *  - buddy init as sum of on-disk bitmap and PAs is done atomically
+ *
+ * a special case when we've used PA to emptiness. no need to modify buddy
+ * in this case, but we should care about concurrent init
+ *
+ */
 
  /*
  * Logic in few words:
@@ -4646,7 +4880,15 @@ error_return:
 	return;
 }
 
-
+/**
+ * ext4_group_add_blocks() -- Add given blocks to an existing group
+ * @handle:			handle to this transaction
+ * @sb:				super block
+ * @block:			start physical block to add to the block group
+ * @count:			number of blocks to free
+ *
+ * This marks the blocks as free in the bitmap and buddy.
+ */
 int ext4_group_add_blocks(handle_t *handle, struct super_block *sb,
 			 ext4_fsblk_t block, unsigned long count)
 {

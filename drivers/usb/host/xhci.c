@@ -583,7 +583,18 @@ static int xhci_run_finished(struct xhci_hcd *xhci)
 	return 0;
 }
 
-
+/*
+ * Start the HC after it was halted.
+ *
+ * This function is called by the USB core when the HC driver is added.
+ * Its opposite is xhci_stop().
+ *
+ * xhci_init() must be called once before this function can be called.
+ * Reset the HC, enable device slot contexts, program DCBAAP, and
+ * set command ring pointer and event ring pointer.
+ *
+ * Setup MSI-X vectors and enable interrupts.
+ */
 int xhci_run(struct usb_hcd *hcd)
 {
 	u32 temp;
@@ -2515,6 +2526,7 @@ static void xhci_add_ep_to_interval_table(struct xhci_hcd *xhci,
 			return;
 		}
 	}
+	/* Add the new endpoint at the end of the list. */
 	list_add_tail(&virt_ep->bw_endpoint_list,
 			&interval_bw->endpoints);
 }

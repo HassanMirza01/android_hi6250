@@ -1,4 +1,20 @@
-
+/*
+ * Copyright (C) 2007 Oracle.  All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License v2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 021110-1307, USA.
+ */
 
 #include <linux/kernel.h>
 #include <linux/bio.h>
@@ -6075,7 +6091,12 @@ static struct inode *btrfs_new_inode(struct btrfs_trans_handle *trans,
 	sizes[0] = sizeof(struct btrfs_inode_item);
 
 	if (name) {
-		
+		/*
+		 * Start new inodes with an inode_ref. This is slightly more
+		 * efficient for small numbers of hard links since they will
+		 * be packed into one item. Extended refs will kick in if we
+		 * add more hard links than can fit in the ref item.
+		 */
 		key[1].objectid = objectid;
 		key[1].type = BTRFS_INODE_REF_KEY;
 		key[1].offset = ref_objectid;
@@ -7242,7 +7263,12 @@ bool btrfs_page_exists_in_range(struct inode *inode, loff_t start, loff_t end)
 
 	rcu_read_lock();
 
-	
+	/* Most of the code in this while loop is lifted from
+	 * find_get_page.  It's been modified to begin searching from a
+	 * page and return just the first page found in that range.  If the
+	 * found idx is less than or equal to the end idx then we know that
+	 * a page exists.  If no pages are found or if those pages are
+	 * outside of the range then we're fine (yay!) */
 	while (page == NULL &&
 	       radix_tree_gang_lookup_slot(root, &pagep, NULL, start_idx, 1)) {
 		page = radix_tree_deref_slot(pagep);
@@ -8696,7 +8722,42 @@ static int btrfs_truncate(struct inode *inode)
 	if (ret)
 		return ret;
 
-	
+	/*
+	 * Yes ladies and gentelment, this is indeed ugly.  The fact is we have
+	 * 3 things going on here
+	 *
+	 * 1) We need to reserve space for our orphan item and the space to
+	 * delete our orphan item.  Lord knows we don't want to have a dangling
+	 * orphan item because we didn't reserve space to remove it.
+	 *
+	 * 2) We need to reserve space to update our inode.
+	 *
+	 * 3) We need to have something to cache all the space that is going to
+	 * be free'd up by the truncate operation, but also have some slack
+	 * space reserved in case it uses space during the truncate (thank you
+	 * very much snapshotting).
+	 *
+	 * And we need these to all be seperate.  The fact is we can use alot of
+	 * space doing the truncate, and we have no earthly idea how much space
+	 * we will use, so we need the truncate reservation to be seperate so it
+	 * doesn't end up using space reserved for updating the inode or
+	 * removing the orphan item.  We also need to be able to stop the
+	 * transaction and start a new one, which means we need to be able to
+	 * update the inode several times, and we have no idea of knowing how
+	 * many times that will be, so we can't just reserve 1 item for the
+	 * entirety of the opration, so that has to be done seperately as well.
+	 * Then there is the orphan item, which does indeed need to be held on
+	 * to for the whole operation, and we need nobody to touch this reserved
+	 * space except the orphan code.
+	 *
+	 * So that leaves us with
+	 *
+	 * 1) root->orphan_block_rsv - for the orphan deletion.
+	 * 2) rsv - for the truncate reservation, which we will steal from the
+	 * transaction reservation.
+	 * 3) fs_info->trans_block_rsv - this will have 1 items worth left for
+	 * updating the inode.
+	 */
 	rsv = btrfs_alloc_block_rsv(root, BTRFS_BLOCK_RSV_TEMP);
 	if (!rsv)
 		return -ENOMEM;
@@ -9092,7 +9153,10 @@ static int btrfs_rename(struct inode *old_dir, struct dentry *old_dentry,
 	}
 	ret = 0;
 
-	
+	/*
+	 * we're using rename to replace one file with another.  Start IO on it
+	 * now so  we don't add too much work to the end of the transaction
+	 */
 	if (new_inode && S_ISREG(old_inode->i_mode) && new_inode->i_size)
 		filemap_flush(old_inode->i_mapping);
 

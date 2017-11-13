@@ -1,4 +1,43 @@
-
+/*
+ *   ALSA driver for RME Hammerfall DSP MADI audio interface(s)
+ *
+ *      Copyright (c) 2003 Winfried Ritsch (IEM)
+ *      code based on hdsp.c   Paul Davis
+ *                             Marcus Andersson
+ *                             Thomas Charbonnel
+ *      Modified 2006-06-01 for AES32 support by Remy Bruno
+ *                                               <remy.bruno@trinnov.com>
+ *
+ *      Modified 2009-04-13 for proper metering by Florian Faber
+ *                                               <faber@faberman.de>
+ *
+ *      Modified 2009-04-14 for native float support by Florian Faber
+ *                                               <faber@faberman.de>
+ *
+ *      Modified 2009-04-26 fixed bug in rms metering by Florian Faber
+ *                                               <faber@faberman.de>
+ *
+ *      Modified 2009-04-30 added hw serial number support by Florian Faber
+ *
+ *      Modified 2011-01-14 added S/PDIF input on RayDATs by Adrian Knoth
+ *
+ *	Modified 2011-01-25 variable period sizes on RayDAT/AIO by Adrian Knoth
+ *
+ *   This program is free software; you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation; either version 2 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program; if not, write to the Free Software
+ *   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+ *
+ */
 
 /* *************    Register Documentation   *******************************************************
  *

@@ -1462,6 +1462,7 @@ static int process_single_tx_qlock(struct drm_dp_mst_topology_mgr *mgr,
 	hdr.msg_len = tosend + 1;
 	drm_dp_encode_sideband_msg_hdr(&hdr, chunk, &idx);
 	memcpy(&chunk[idx], &txmsg->msg[txmsg->cur_offset], tosend);
+	/* add crc at end */
 	drm_dp_crc_sideband_chunk_req(&chunk[idx], tosend);
 	idx += tosend + 1;
 

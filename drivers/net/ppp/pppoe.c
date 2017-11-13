@@ -1,4 +1,61 @@
-
+/** -*- linux-c -*- ***********************************************************
+ * Linux PPP over Ethernet (PPPoX/PPPoE) Sockets
+ *
+ * PPPoX --- Generic PPP encapsulation socket family
+ * PPPoE --- PPP over Ethernet (RFC 2516)
+ *
+ *
+ * Version:	0.7.0
+ *
+ * 070228 :	Fix to allow multiple sessions with same remote MAC and same
+ *		session id by including the local device ifindex in the
+ *		tuple identifying a session. This also ensures packets can't
+ *		be injected into a session from interfaces other than the one
+ *		specified by userspace. Florian Zumbiehl <florz@florz.de>
+ *		(Oh, BTW, this one is YYMMDD, in case you were wondering ...)
+ * 220102 :	Fix module use count on failure in pppoe_create, pppox_sk -acme
+ * 030700 :	Fixed connect logic to allow for disconnect.
+ * 270700 :	Fixed potential SMP problems; we must protect against
+ *		simultaneous invocation of ppp_input
+ *		and ppp_unregister_channel.
+ * 040800 :	Respect reference count mechanisms on net-devices.
+ * 200800 :	fix kfree(skb) in pppoe_rcv (acme)
+ *		Module reference count is decremented in the right spot now,
+ *		guards against sock_put not actually freeing the sk
+ *		in pppoe_release.
+ * 051000 :	Initialization cleanup.
+ * 111100 :	Fix recvmsg.
+ * 050101 :	Fix PADT procesing.
+ * 140501 :	Use pppoe_rcv_core to handle all backlog. (Alexey)
+ * 170701 :	Do not lock_sock with rwlock held. (DaveM)
+ *		Ignore discovery frames if user has socket
+ *		locked. (DaveM)
+ *		Ignore return value of dev_queue_xmit in __pppoe_xmit
+ *		or else we may kfree an SKB twice. (DaveM)
+ * 190701 :	When doing copies of skb's in __pppoe_xmit, always delete
+ *		the original skb that was passed in on success, never on
+ *		failure.  Delete the copy of the skb on failure to avoid
+ *		a memory leak.
+ * 081001 :	Misc. cleanup (licence string, non-blocking, prevent
+ *		reference of device on close).
+ * 121301 :	New ppp channels interface; cannot unregister a channel
+ *		from interrupts.  Thus, we mark the socket as a ZOMBIE
+ *		and do the unregistration later.
+ * 081002 :	seq_file support for proc stuff -acme
+ * 111602 :	Merge all 2.4 fixes into 2.5/2.6 tree.  Label 2.5/2.6
+ *		as version 0.7.  Spacing cleanup.
+ * Author:	Michal Ostrowski <mostrows@speakeasy.net>
+ * Contributors:
+ * 		Arnaldo Carvalho de Melo <acme@conectiva.com.br>
+ *		David S. Miller (davem@redhat.com)
+ *
+ * License:
+ *		This program is free software; you can redistribute it and/or
+ *		modify it under the terms of the GNU General Public License
+ *		as published by the Free Software Foundation; either version
+ *		2 of the License, or (at your option) any later version.
+ *
+ */
 
 #include <linux/string.h>
 #include <linux/module.h>

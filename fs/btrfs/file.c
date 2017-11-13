@@ -1,4 +1,20 @@
-
+/*
+ * Copyright (C) 2007 Oracle.  All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License v2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this program; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 021110-1307, USA.
+ */
 
 #include <linux/fs.h>
 #include <linux/pagemap.h>
@@ -412,7 +428,15 @@ static noinline int btrfs_copy_from_user(loff_t pos, int num_pages,
 		/* Flush processor's dcache for this page */
 		flush_dcache_page(page);
 
-		
+		/*
+		 * if we get a partial write, we can end up with
+		 * partially up to date pages.  These add
+		 * a lot of complexity, so make sure they don't
+		 * happen by forcing this copy to be retried.
+		 *
+		 * The rest of the btrfs_file_write code will fall
+		 * back to page at a time copies after we return 0.
+		 */
 		if (!PageUptodate(page) && copied < count)
 			copied = 0;
 
@@ -655,7 +679,15 @@ next:
 		free_extent_map(split2);
 }
 
-
+/*
+ * this is very complex, but the basic idea is to drop all extents
+ * in the range start - end.  hint_block is filled in with a block number
+ * that would be a good hint to the block allocator for this file.
+ *
+ * If an extent intersects the range but is not entirely inside the range
+ * it is either truncated or split.  Anything entirely inside the range
+ * is deleted from the tree.
+ */
 int __btrfs_drop_extents(struct btrfs_trans_handle *trans,
 			 struct btrfs_root *root, struct inode *inode,
 			 struct btrfs_path *path, u64 start, u64 end,
@@ -933,7 +965,12 @@ delete_extent_item:
 	}
 
 	if (!ret && del_nr > 0) {
-		
+		/*
+		 * Set path->slots[0] to first slot, so that after the delete
+		 * if items are move off from our leaf to its immediate left or
+		 * right neighbor leafs, we end up with a correct and adjusted
+		 * path->slots[0] for our insertion (if replace_extent != 0).
+		 */
 		path->slots[0] = del_slot;
 		ret = btrfs_del_items(trans, root, path, del_slot, del_nr);
 		if (ret)
@@ -1869,7 +1906,38 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 		 */
 		ret = btrfs_wait_ordered_range(inode, start, end - start + 1);
 	} else {
-		
+		/*
+		 * Start any new ordered operations before starting to log the
+		 * inode. We will wait for them to finish in btrfs_sync_log().
+		 *
+		 * Right before acquiring the inode's mutex, we might have new
+		 * writes dirtying pages, which won't immediately start the
+		 * respective ordered operations - that is done through the
+		 * fill_delalloc callbacks invoked from the writepage and
+		 * writepages address space operations. So make sure we start
+		 * all ordered operations before starting to log our inode. Not
+		 * doing this means that while logging the inode, writeback
+		 * could start and invoke writepage/writepages, which would call
+		 * the fill_delalloc callbacks (cow_file_range,
+		 * submit_compressed_extents). These callbacks add first an
+		 * extent map to the modified list of extents and then create
+		 * the respective ordered operation, which means in
+		 * tree-log.c:btrfs_log_inode() we might capture all existing
+		 * ordered operations (with btrfs_get_logged_extents()) before
+		 * the fill_delalloc callback adds its ordered operation, and by
+		 * the time we visit the modified list of extent maps (with
+		 * btrfs_log_changed_extents()), we see and process the extent
+		 * map they created. We then use the extent map to construct a
+		 * file extent item for logging without waiting for the
+		 * respective ordered operation to finish - this file extent
+		 * item points to a disk location that might not have yet been
+		 * written to, containing random data - so after a crash a log
+		 * replay will make our inode have file extent items that point
+		 * to disk locations containing invalid data, as we returned
+		 * success to userspace without waiting for the respective
+		 * ordered operation to finish, because it wasn't captured by
+		 * btrfs_get_logged_extents().
+		 */
 		ret = start_ordered_ops(inode, start, end);
 	}
 	if (ret) {
@@ -1954,7 +2022,16 @@ int btrfs_sync_file(struct file *file, loff_t start, loff_t end, int datasync)
 		ret = 1;
 	}
 
-	
+	/* we've logged all the items and now have a consistent
+	 * version of the file in the log.  It is possible that
+	 * someone will come in and modify the file, but that's
+	 * fine because the log is consistent on disk, and we
+	 * have references to all of the file's extents
+	 *
+	 * It is possible that someone will come in and log the
+	 * file again, but that will end up using the synchronization
+	 * inside btrfs_sync_log to keep things safe.
+	 */
 	mutex_unlock(&inode->i_mutex);
 
 	/*
@@ -2146,7 +2223,12 @@ out:
 	return 0;
 }
 
-
+/*
+ * Find a hole extent on given inode and change start/len to the end of hole
+ * extent.(hole/vacuum extent whose em->start <= start &&
+ *	   em->start + em->len > start)
+ * When a hole extent is found, return 1 and modify start/len.
+ */
 static int find_first_non_hole(struct inode *inode, u64 *start, u64 *len)
 {
 	struct extent_map *em;
