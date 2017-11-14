@@ -1,4 +1,17 @@
-
+/*
+ *  linux/arch/cris/kernel/signal.c
+ *
+ *  Based on arch/i386/kernel/signal.c by
+ *     Copyright (C) 1991, 1992  Linus Torvalds
+ *     1997-11-28  Modified for POSIX.1b signals by Richard Henderson *
+ *
+ *  Ideas also taken from arch/arm.
+ *
+ *  Copyright (C) 2000-2007 Axis Communications AB
+ *
+ *  Authors:  Bjorn Wesen (bjornw@axis.com)
+ *
+ */
 
 #include <linux/sched.h>
 #include <linux/mm.h>

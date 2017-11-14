@@ -1,7 +1,10 @@
 #ifndef _ASM_IA64_HARDIRQ_H
 #define _ASM_IA64_HARDIRQ_H
 
-
+/*
+ * Modified 1998-2002, 2004 Hewlett-Packard Co
+ *	David Mosberger-Tang <davidm@hpl.hp.com>
+ */
 
 /*
  * No irq_cpustat_t for IA-64.  The data is held in the per-CPU data structure.

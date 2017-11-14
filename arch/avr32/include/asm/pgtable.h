@@ -1,4 +1,10 @@
-
+/*
+ * Copyright (C) 2004-2006 Atmel Corporation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
 #ifndef __ASM_AVR32_PGTABLE_H
 #define __ASM_AVR32_PGTABLE_H
 
@@ -37,7 +43,22 @@ extern void paging_init(void);
 extern struct page *empty_zero_page;
 #define ZERO_PAGE(vaddr) (empty_zero_page)
 
-
+/*
+ * Just any arbitrary offset to the start of the vmalloc VM area: the
+ * current 8 MiB value just means that there will be a 8 MiB "hole"
+ * after the uncached physical memory (P2 segment) until the vmalloc
+ * area starts. That means that any out-of-bounds memory accesses will
+ * hopefully be caught; we don't know if the end of the P1/P2 segments
+ * are actually used for anything, but it is anyway safer to let the
+ * MMU catch these kinds of errors than to rely on the memory bus.
+ *
+ * A "hole" of the same size is added to the end of the P3 segment as
+ * well. It might seem wasteful to use 16 MiB of virtual address space
+ * on this, but we do have 512 MiB of it...
+ *
+ * The vmalloc() routines leave a hole of 4 KiB between each vmalloced
+ * area for the same reason.
+ */
 #define VMALLOC_OFFSET	(8 * 1024 * 1024)
 #define VMALLOC_START	(P3SEG + VMALLOC_OFFSET)
 #define VMALLOC_END	(P4SEG - VMALLOC_OFFSET)

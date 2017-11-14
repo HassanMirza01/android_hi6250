@@ -40,7 +40,11 @@ unsigned long bfin_get_addr_from_rp(unsigned long *ptr,
 		return 0;
 	}
 
-	
+	/*
+	 * Stack-relative relocs contain the offset into the stack, we
+	 * have to add the stack's start address here and return 1 from
+	 * flat_addr_absolute to prevent the normal address calculations
+	 */
 	if (relval & (1 << 29))
 		return val + current->mm->context.end_brk;
 

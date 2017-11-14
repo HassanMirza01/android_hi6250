@@ -103,6 +103,7 @@ $a_eos:
 1:	stq_u	t0, 0(a0)	# e0    :
 	ret	(t9)		# e1    :
 
+	/* Add the end-of-count bit to the eos detection bitmask.  */
 $a_eoc:
 	or	t10, t8, t8
 	br	$a_eos
