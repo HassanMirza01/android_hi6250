@@ -8,7 +8,17 @@
  * for more details.
  */
 
-
+/*
+ * Linux/m68k support by Hamish Macdonald
+ *
+ * 68060 fixes by Jesper Skov
+ *
+ * 1997-12-01  Modified for POSIX.1b signals by Andreas Schwab
+ *
+ * mathemu support by Roman Zippel
+ *  (Note: fpstate in the signal context is completely ignored for the emulator
+ *         and the internal floating point format is put on stack)
+ */
 
 /*
  * ++roman (07/09/96): implemented signal stacks (specially for tosemu on

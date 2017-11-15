@@ -1,4 +1,18 @@
-
+/*
+ * Architecture-specific unaligned trap handling.
+ *
+ * Copyright (C) 1999-2002, 2004 Hewlett-Packard Co
+ *	Stephane Eranian <eranian@hpl.hp.com>
+ *	David Mosberger-Tang <davidm@hpl.hp.com>
+ *
+ * 2002/12/09   Fix rotating register handling (off-by-1 error, missing fr-rotation).  Fix
+ *		get_rse_reg() to not leak kernel bits to user-level (reading an out-of-frame
+ *		stacked register returns an undefined value; it does NOT trigger a
+ *		"rsvd register fault").
+ * 2001/10/11	Fix unaligned access to rotating registers in s/w pipelined loops.
+ * 2001/08/13	Correct size of extended floats (float_fsz) from 16 to 10 bytes.
+ * 2001/01/17	Add support emulation of unaligned kernel accesses.
+ */
 #include <linux/jiffies.h>
 #include <linux/kernel.h>
 #include <linux/sched.h>

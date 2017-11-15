@@ -17,7 +17,15 @@
  * components found on the BOARDs.
  */
 
-
+/*
+ * WARNING:
+ *	Certain assembly language routines (notably xxxxx.s) in the IP27PROM
+ *	will depend on the format of the data structures in this file.	In
+ *	most cases, rearranging the fields can seriously break things.
+ *	Adding fields in the beginning or middle can also break things.
+ *	Add fields if necessary, to the end of a struct in such a way
+ *	that offsets of existing fields do not change.
+ */
 
 #include <linux/types.h>
 #include <asm/sn/types.h>

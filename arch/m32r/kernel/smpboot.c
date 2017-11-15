@@ -143,7 +143,23 @@ void smp_prepare_boot_cpu(void)
 	current_thread_info()->cpu = 0;
 }
 
-
+/*==========================================================================*
+ * Name:         smp_prepare_cpus (old smp_boot_cpus)
+ *
+ * Description:  This routine boot up APs.
+ *
+ * Born on Date: 2002.02.05
+ *
+ * Arguments:    NONE
+ *
+ * Returns:      void (cannot fail)
+ *
+ * Modification log:
+ * Date       Who Description
+ * ---------- --- --------------------------------------------------------
+ * 2003-06-24 hy  modify for linux-2.5.69
+ *
+ *==========================================================================*/
 void __init smp_prepare_cpus(unsigned int max_cpus)
 {
 	int phys_id;
@@ -223,7 +239,23 @@ static void __init init_ipi_lock(void)
 		spin_lock_init(&ipi_lock[ipi]);
 }
 
-
+/*==========================================================================*
+ * Name:         do_boot_cpu
+ *
+ * Description:  This routine boot up one AP.
+ *
+ * Born on Date: 2002.02.05
+ *
+ * Arguments:    phys_id - Target CPU physical ID
+ *
+ * Returns:      void (cannot fail)
+ *
+ * Modification log:
+ * Date       Who Description
+ * ---------- --- --------------------------------------------------------
+ * 2003-06-24 hy  modify for linux-2.5.69
+ *
+ *==========================================================================*/
 static void __init do_boot_cpu(int phys_id)
 {
 	struct task_struct *idle;
@@ -367,7 +399,23 @@ void __init smp_cpus_done(unsigned int max_cpus)
 /* Activate a secondary processor Routines                                   */
 /*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*/
 
-
+/*==========================================================================*
+ * Name:         start_secondary
+ *
+ * Description:  This routine activate a secondary processor.
+ *
+ * Born on Date: 2002.02.05
+ *
+ * Arguments:    *unused - currently unused.
+ *
+ * Returns:      void (cannot fail)
+ *
+ * Modification log:
+ * Date       Who Description
+ * ---------- --- --------------------------------------------------------
+ * 2003-06-24 hy  modify for linux-2.5.69
+ *
+ *==========================================================================*/
 int __init start_secondary(void *unused)
 {
 	cpu_init();
@@ -388,7 +436,23 @@ int __init start_secondary(void *unused)
 	return 0;
 }
 
-
+/*==========================================================================*
+ * Name:         smp_callin
+ *
+ * Description:  This routine activate a secondary processor.
+ *
+ * Born on Date: 2002.02.05
+ *
+ * Arguments:    NONE
+ *
+ * Returns:      void (cannot fail)
+ *
+ * Modification log:
+ * Date       Who Description
+ * ---------- --- --------------------------------------------------------
+ * 2003-06-24 hy  modify for linux-2.5.69
+ *
+ *==========================================================================*/
 static void __init smp_callin(void)
 {
 	int phys_id = hard_smp_processor_id();

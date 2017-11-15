@@ -252,6 +252,7 @@ static int snd_ice1712_hoontech_init(struct snd_ice1712 *ice)
  * AK4524 access
  */
 
+/* start callback for STDSP24 with modified hardware */
 static void stdsp24_ak4524_lock(struct snd_akm4xxx *ak, int chip)
 {
 	struct snd_ice1712 *ice = ak->private_data[0];

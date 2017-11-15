@@ -1,4 +1,14 @@
-
+/*
+ *  linux/arch/m32r/kernel/signal.c
+ *
+ *  Copyright (c) 2003  Hitoshi Yamamoto
+ *
+ *  Taken from i386 version.
+ *  Copyright (C) 1991, 1992  Linus Torvalds
+ *
+ *  1997-11-28  Modified for POSIX.1b signals by Richard Henderson
+ *  2000-06-20  Pentium III FXSR, SSE support by Gareth Hughes
+ */
 
 #include <linux/sched.h>
 #include <linux/mm.h>

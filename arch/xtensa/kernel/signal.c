@@ -1,4 +1,19 @@
-
+/*
+ * arch/xtensa/kernel/signal.c
+ *
+ * Default platform functions.
+ *
+ * This file is subject to the terms and conditions of the GNU General Public
+ * License.  See the file "COPYING" in the main directory of this archive
+ * for more details.
+ *
+ * Copyright (C) 2005, 2006 Tensilica Inc.
+ * Copyright (C) 1991, 1992  Linus Torvalds
+ * 1997-11-28  Modified for POSIX.1b signals by Richard Henderson
+ *
+ * Chris Zankel <chris@zankel.net>
+ * Joe Taylor <joe@tensilica.com>
+ */
 
 #include <linux/signal.h>
 #include <linux/errno.h>

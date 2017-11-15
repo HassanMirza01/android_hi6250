@@ -1,4 +1,23 @@
-
+/*
+ *  PowerPC version
+ *    Copyright (C) 1995-1996 Gary Thomas (gdt@linuxppc.org)
+ *  Rewritten by Cort Dougan (cort@cs.nmt.edu) for PReP
+ *    Copyright (C) 1996 Cort Dougan <cort@cs.nmt.edu>
+ *  Low-level exception handlers and MMU support
+ *  rewritten by Paul Mackerras.
+ *    Copyright (C) 1996 Paul Mackerras.
+ *  MPC8xx modifications by Dan Malek
+ *    Copyright (C) 1997 Dan Malek (dmalek@jlc.net).
+ *
+ *  This file contains low-level support and setup for PowerPC 8xx
+ *  embedded processors, including trap and interrupt dispatch.
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
+ *
+ */
 
 #include <linux/init.h>
 #include <asm/processor.h>
@@ -544,7 +563,7 @@ modified_instr:
 	mfctr	r10
 	mtdar	r10			/* save ctr reg in DAR */
 	rlwinm	r10, r11, 24, 24, 28	/* offset into jump table for reg RB */
-	addi	r10, r10, 150f@l
+	addi	r10, r10, 150f@l	/* add start of table */
 	mtctr	r10			/* load ctr with jump address */
 	xor	r10, r10, r10		/* sum starts at zero */
 	bctr				/* jump into table */
@@ -584,7 +603,7 @@ modified_instr:
 151:
 	rlwinm. r11,r11,19,24,28	/* offset into jump table for reg RA */
 	beq	152f			/* if reg RA is zero, don't add it */
-	addi	r11, r11, 150b@l
+	addi	r11, r11, 150b@l	/* add start of table */
 	mtctr	r11			/* load ctr with jump address */
 	rlwinm	r11,r11,0,16,10		/* make sure we don't execute this more than once */
 	bctr				/* jump into table */

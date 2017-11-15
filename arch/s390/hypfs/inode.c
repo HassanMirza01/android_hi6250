@@ -42,6 +42,7 @@ static const struct file_operations hypfs_file_ops;
 static struct file_system_type hypfs_type;
 static const struct super_operations hypfs_s_ops;
 
+/* start of list of all dentries, which have to be deleted on update */
 static struct dentry *hypfs_last_dentry;
 
 static void hypfs_update_update(struct super_block *sb)

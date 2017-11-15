@@ -20,6 +20,7 @@
 #define PA_SHUTDOWN	0xb0000003	/* Shutdown Control Register */
 #define PA_PCIPME	0xb0000004	/* PCI PME Status Register */
 #define PA_IMASK	0xb0000005	/* Interrupt Mask Register */
+/* 2003.10.31 I-O DATA NSD NWG	add.	for shutdown port clear */
 #define PA_PWRINT_CLR	0xb0000006	/* Shutdown Interrupt clear Register */
 
 #define PA_PIDE_OFFSET	0x40		/* CF IDE Offset */

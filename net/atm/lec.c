@@ -1287,7 +1287,10 @@ static void lec_arp_clear_vccs(struct lec_arp_table *entry)
 	}
 }
 
-
+/*
+ * Insert entry to lec_arp_table
+ * LANE2: Add to the end of the list to satisfy 8.1.13
+ */
 static inline void
 lec_arp_add(struct lec_priv *priv, struct lec_arp_table *entry)
 {
@@ -1660,7 +1663,22 @@ static bool __lec_arp_check_expire(struct lec_arp_table *entry,
 
 	return false;
 }
-
+/*
+ * Expire entries.
+ * 1. Re-set timer
+ * 2. For each entry, delete entries that have aged past the age limit.
+ * 3. For each entry, depending on the status of the entry, perform
+ *    the following maintenance.
+ *    a. If status is ESI_VC_PENDING or ESI_ARP_PENDING then if the
+ *       tick_count is above the max_unknown_frame_time, clear
+ *       the tick_count to zero and clear the packets_flooded counter
+ *       to zero. This supports the packet rate limit per address
+ *       while flooding unknowns.
+ *    b. If the status is ESI_FLUSH_PENDING and the tick_count is greater
+ *       than or equal to the path_switching_delay, change the status
+ *       to ESI_FORWARD_DIRECT. This causes the flush period to end
+ *       regardless of the progress of the flush protocol.
+ */
 static void lec_arp_check_expire(struct work_struct *work)
 {
 	unsigned long flags;

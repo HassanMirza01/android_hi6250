@@ -1,4 +1,21 @@
-
+/*
+ * Signal handling for 32bit PPC and 32bit tasks on 64bit PPC
+ *
+ *  PowerPC version
+ *    Copyright (C) 1995-1996 Gary Thomas (gdt@linuxppc.org)
+ * Copyright (C) 2001 IBM
+ * Copyright (C) 1997,1998 Jakub Jelinek (jj@sunsite.mff.cuni.cz)
+ * Copyright (C) 1997 David S. Miller (davem@caip.rutgers.edu)
+ *
+ *  Derived from "arch/i386/kernel/signal.c"
+ *    Copyright (C) 1991, 1992 Linus Torvalds
+ *    1997-11-28  Modified for POSIX.1b signals by Richard Henderson
+ *
+ *  This program is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either version
+ *  2 of the License, or (at your option) any later version.
+ */
 
 #include <linux/sched.h>
 #include <linux/mm.h>

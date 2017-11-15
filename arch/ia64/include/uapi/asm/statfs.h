@@ -8,7 +8,11 @@
  *	David Mosberger-Tang <davidm@hpl.hp.com>, Hewlett-Packard Co
  */
 
-
+/*
+ * We need compat_statfs64 to be packed, because the i386 ABI won't
+ * add padding at the end to bring it to a multiple of 8 bytes, but
+ * the IA64 ABI will.
+ */
 #define ARCH_PACK_COMPAT_STATFS64 __attribute__((packed,aligned(4)))
 
 #include <asm-generic/statfs.h>

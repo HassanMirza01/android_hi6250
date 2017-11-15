@@ -12,7 +12,46 @@
  *    materials provided with the distribution.
  */
 
-
+/*
+ * The IOP chips are used in the IIfx and some Quadras (900, 950) to manage
+ * serial and ADB. They are actually a 6502 processor and some glue logic.
+ *
+ * 990429 (jmt) - Initial implementation, just enough to knock the SCC IOP
+ *		  into compatible mode so nobody has to fiddle with the
+ *		  Serial Switch control panel anymore.
+ * 990603 (jmt) - Added code to grab the correct ISM IOP interrupt for OSS
+ *		  and non-OSS machines (at least I hope it's correct on a
+ *		  non-OSS machine -- someone with a Q900 or Q950 needs to
+ *		  check this.)
+ * 990605 (jmt) - Rearranged things a bit wrt IOP detection; iop_present is
+ *		  gone, IOP base addresses are now in an array and the
+ *		  globally-visible functions take an IOP number instead of an
+ *		  an actual base address.
+ * 990610 (jmt) - Finished the message passing framework and it seems to work.
+ *		  Sending _definitely_ works; my adb-bus.c mods can send
+ *		  messages and receive the MSG_COMPLETED status back from the
+ *		  IOP. The trick now is figuring out the message formats.
+ * 990611 (jmt) - More cleanups. Fixed problem where unclaimed messages on a
+ *		  receive channel were never properly acknowledged. Bracketed
+ *		  the remaining debug printk's with #ifdef's and disabled
+ *		  debugging. I can now type on the console.
+ * 990612 (jmt) - Copyright notice added. Reworked the way replies are handled.
+ *		  It turns out that replies are placed back in the send buffer
+ *		  for that channel; messages on the receive channels are always
+ *		  unsolicited messages from the IOP (and our replies to them
+ *		  should go back in the receive channel.) Also added tracking
+ *		  of device names to the listener functions ala the interrupt
+ *		  handlers.
+ * 990729 (jmt) - Added passing of pt_regs structure to IOP handlers. This is
+ *		  used by the new unified ADB driver.
+ *
+ * TODO:
+ *
+ * o Something should be periodically checking iop_alive() to make sure the
+ *   IOP hasn't died.
+ * o Some of the IOP manager routines need better error checking and
+ *   return codes. Nothing major, just prettying up.
+ */
 
 /*
  * -----------------------

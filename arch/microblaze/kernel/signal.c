@@ -1,4 +1,22 @@
-
+/*
+ * Signal handling
+ *
+ * Copyright (C) 2008-2009 Michal Simek <monstr@monstr.eu>
+ * Copyright (C) 2008-2009 PetaLogix
+ * Copyright (C) 2003,2004 John Williams <jwilliams@itee.uq.edu.au>
+ * Copyright (C) 2001 NEC Corporation
+ * Copyright (C) 2001 Miles Bader <miles@gnu.org>
+ * Copyright (C) 1999,2000 Niibe Yutaka & Kaz Kojima
+ * Copyright (C) 1991,1992 Linus Torvalds
+ *
+ * 1997-11-28 Modified for POSIX.1b signals by Richard Henderson
+ *
+ * This file was was derived from the sh version, arch/sh/kernel/signal.c
+ *
+ * This file is subject to the terms and conditions of the GNU General
+ * Public License. See the file COPYING in the main directory of this
+ * archive for more details.
+ */
 
 #include <linux/sched.h>
 #include <linux/mm.h>

@@ -1,4 +1,12 @@
-
+/*
+ *  linux/arch/x86_64/ia32/ia32_signal.c
+ *
+ *  Copyright (C) 1991, 1992  Linus Torvalds
+ *
+ *  1997-11-28  Modified for POSIX.1b signals by Richard Henderson
+ *  2000-06-20  Pentium III FXSR, SSE support by Gareth Hughes
+ *  2000-12-*   x86-64 compatibility mode signal handling by Andi Kleen
+ */
 
 #include <linux/sched.h>
 #include <linux/mm.h>

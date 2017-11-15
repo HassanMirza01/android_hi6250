@@ -1,4 +1,14 @@
-
+/*
+ * Kernel support for the ptrace() and syscall tracing interfaces.
+ *
+ * Copyright (C) 1999-2005 Hewlett-Packard Co
+ *	David Mosberger-Tang <davidm@hpl.hp.com>
+ * Copyright (C) 2006 Intel Co
+ *  2006-08-12	- IA64 Native Utrace implementation support added by
+ *	Anil S Keshavamurthy <anil.s.keshavamurthy@intel.com>
+ *
+ * Derived from the x86 and Alpha versions.
+ */
 #include <linux/kernel.h>
 #include <linux/sched.h>
 #include <linux/mm.h>
@@ -1352,7 +1362,30 @@ access_elf_areg(struct task_struct *target, struct unw_frame_info *info,
 				*data = pt->ar_rsc;
 			return 0;
 		case ELF_AR_BSP_OFFSET:
-			
+			/*
+			 * By convention, we use PT_AR_BSP to refer to
+			 * the end of the user-level backing store.
+			 * Use ia64_rse_skip_regs(PT_AR_BSP, -CFM.sof)
+			 * to get the real value of ar.bsp at the time
+			 * the kernel was entered.
+			 *
+			 * Furthermore, when changing the contents of
+			 * PT_AR_BSP (or PT_CFM) while the task is
+			 * blocked in a system call, convert the state
+			 * so that the non-system-call exit
+			 * path is used.  This ensures that the proper
+			 * state will be picked up when resuming
+			 * execution.  However, it *also* means that
+			 * once we write PT_AR_BSP/PT_CFM, it won't be
+			 * possible to modify the syscall arguments of
+			 * the pending system call any longer.  This
+			 * shouldn't be an issue because modifying
+			 * PT_AR_BSP/PT_CFM generally implies that
+			 * we're either abandoning the pending system
+			 * call or that we defer it's re-execution
+			 * (e.g., due to GDB doing an inferior
+			 * function call).
+			 */
 			urbs_end = ia64_get_user_rbs_end(target, pt, &cfm);
 			if (write_access) {
 				if (*data != urbs_end) {
@@ -2025,7 +2058,23 @@ access_uarea(struct task_struct *child, unsigned long addr,
 		return -1;
 	}
 #ifdef CONFIG_PERFMON
-	
+	/*
+	 * Check if debug registers are used by perfmon. This
+	 * test must be done once we know that we can do the
+	 * operation, i.e. the arguments are all valid, but
+	 * before we start modifying the state.
+	 *
+	 * Perfmon needs to keep a count of how many processes
+	 * are trying to modify the debug registers for system
+	 * wide monitoring sessions.
+	 *
+	 * We also include read access here, because they may
+	 * cause the PMU-installed debug register state
+	 * (dbr[], ibr[]) to be reset. The two arrays are also
+	 * used by perfmon, but we do not use
+	 * IA64_THREAD_DBG_VALID. The registers are restored
+	 * by the PMU context switch code.
+	 */
 	if (pfm_use_debug_registers(child))
 		return -1;
 #endif

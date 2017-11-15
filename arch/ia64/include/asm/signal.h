@@ -1,4 +1,10 @@
-
+/*
+ * Modified 1998-2001, 2003
+ *	David Mosberger-Tang <davidm@hpl.hp.com>, Hewlett-Packard Co
+ *
+ * Unfortunately, this file is being included by bits/signal.h in
+ * glibc-2.x.  Hence the #ifdef __KERNEL__ ugliness.
+ */
 #ifndef _ASM_IA64_SIGNAL_H
 #define _ASM_IA64_SIGNAL_H
 

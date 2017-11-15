@@ -1,4 +1,29 @@
-
+/***********************license start***************
+ * Author: Cavium Networks
+ *
+ * Contact: support@caviumnetworks.com
+ * This file is part of the OCTEON SDK
+ *
+ * Copyright (c) 2003-2008 Cavium Networks
+ *
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License, Version 2, as
+ * published by the Free Software Foundation.
+ *
+ * This file is distributed in the hope that it will be useful, but
+ * AS-IS and WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, TITLE, or
+ * NONINFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this file; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ * or visit http://www.gnu.org/licenses/.
+ *
+ * This file may also be available under a different license from Cavium.
+ * Contact Cavium Networks for more information
+ ***********************license end**************************************/
 
 /*
  * Simple allocate only memory allocator.  Used to allocate memory at
@@ -338,7 +363,17 @@ int64_t cvmx_bootmem_phy_alloc(uint64_t req_size, uint64_t address_min,
 				cvmx_bootmem_unlock();
 			return desired_min_addr;
 		}
-		
+		/*
+		 * block returned doesn't start at beginning of entry,
+		 * so we know that we will be splitting a block off
+		 * the front of this one.  Create a new block from the
+		 * beginning, add to list, and go to top of loop
+		 * again.
+		 *
+		 * create new block from high portion of
+		 * block, so that top block starts at desired
+		 * addr.
+		 */
 		new_ent_addr = desired_min_addr;
 		cvmx_bootmem_phy_set_next(new_ent_addr,
 					cvmx_bootmem_phy_get_next
@@ -417,7 +452,11 @@ int __cvmx_bootmem_phy_free(uint64_t phy_addr, uint64_t size, uint32_t flags)
 	}
 
 	if (!cur_addr) {
-		
+		/*
+		 * We have reached the end of the list, add on to end,
+		 * checking to see if we need to combine with last
+		 * block
+		 */
 		if (prev_addr + cvmx_bootmem_phy_get_size(prev_addr) ==
 		    phy_addr) {
 			cvmx_bootmem_phy_set_size(prev_addr,

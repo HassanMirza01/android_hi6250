@@ -1,6 +1,257 @@
+/* -*- mode: asm -*-
+**
+** head.S -- This file contains the initial boot code for the
+**	     Linux/68k kernel.
+**
+** Copyright 1993 by Hamish Macdonald
+**
+** 68040 fixes by Michael Rausch
+** 68060 fixes by Roman Hodek
+** MMU cleanup by Randy Thelen
+** Final MMU cleanup by Roman Zippel
+**
+** Atari support by Andreas Schwab, using ideas of Robert de Vries
+** and Bjoern Brauel
+** VME Support by Richard Hirst
+**
+** 94/11/14 Andreas Schwab: put kernel at PAGESIZE
+** 94/11/18 Andreas Schwab: remove identity mapping of STRAM for Atari
+** ++ Bjoern & Roman: ATARI-68040 support for the Medusa
+** 95/11/18 Richard Hirst: Added MVME166 support
+** 96/04/26 Guenther Kelleter: fixed identity mapping for Falcon with
+**			      Magnum- and FX-alternate ram
+** 98/04/25 Phil Blundell: added HP300 support
+** 1998/08/30 David Kilzer: Added support for font_desc structures
+**            for linux-2.1.115
+** 1999/02/11  Richard Zidlicky: added Q40 support (initial version 99/01/01)
+** 2004/05/13 Kars de Jong: Finalised HP300 support
+**
+** This file is subject to the terms and conditions of the GNU General Public
+** License. See the file README.legal in the main directory of this archive
+** for more details.
+**
+*/
 
-
-
+/*
+ * Linux startup code.
+ *
+ * At this point, the boot loader has:
+ * Disabled interrupts
+ * Disabled caches
+ * Put us in supervisor state.
+ *
+ * The kernel setup code takes the following steps:
+ * .  Raise interrupt level
+ * .  Set up initial kernel memory mapping.
+ *    .  This sets up a mapping of the 4M of memory the kernel is located in.
+ *    .  It also does a mapping of any initial machine specific areas.
+ * .  Enable the MMU
+ * .  Enable cache memories
+ * .  Jump to kernel startup
+ *
+ * Much of the file restructuring was to accomplish:
+ * 1) Remove register dependency through-out the file.
+ * 2) Increase use of subroutines to perform functions
+ * 3) Increase readability of the code
+ *
+ * Of course, readability is a subjective issue, so it will never be
+ * argued that that goal was accomplished.  It was merely a goal.
+ * A key way to help make code more readable is to give good
+ * documentation.  So, the first thing you will find is exaustive
+ * write-ups on the structure of the file, and the features of the
+ * functional subroutines.
+ *
+ * General Structure:
+ * ------------------
+ *	Without a doubt the single largest chunk of head.S is spent
+ * mapping the kernel and I/O physical space into the logical range
+ * for the kernel.
+ *	There are new subroutines and data structures to make MMU
+ * support cleaner and easier to understand.
+ *	First, you will find a routine call "mmu_map" which maps
+ * a logical to a physical region for some length given a cache
+ * type on behalf of the caller.  This routine makes writing the
+ * actual per-machine specific code very simple.
+ *	A central part of the code, but not a subroutine in itself,
+ * is the mmu_init code which is broken down into mapping the kernel
+ * (the same for all machines) and mapping machine-specific I/O
+ * regions.
+ *	Also, there will be a description of engaging the MMU and
+ * caches.
+ *	You will notice that there is a chunk of code which
+ * can emit the entire MMU mapping of the machine.  This is present
+ * only in debug modes and can be very helpful.
+ *	Further, there is a new console driver in head.S that is
+ * also only engaged in debug mode.  Currently, it's only supported
+ * on the Macintosh class of machines.  However, it is hoped that
+ * others will plug-in support for specific machines.
+ *
+ * ######################################################################
+ *
+ * mmu_map
+ * -------
+ *	mmu_map was written for two key reasons.  First, it was clear
+ * that it was very difficult to read the previous code for mapping
+ * regions of memory.  Second, the Macintosh required such extensive
+ * memory allocations that it didn't make sense to propagate the
+ * existing code any further.
+ *	mmu_map requires some parameters:
+ *
+ *	mmu_map (logical, physical, length, cache_type)
+ *
+ *	While this essentially describes the function in the abstract, you'll
+ * find more indepth description of other parameters at the implementation site.
+ *
+ * mmu_get_root_table_entry
+ * ------------------------
+ * mmu_get_ptr_table_entry
+ * -----------------------
+ * mmu_get_page_table_entry
+ * ------------------------
+ *
+ *	These routines are used by other mmu routines to get a pointer into
+ * a table, if necessary a new table is allocated. These routines are working
+ * basically like pmd_alloc() and pte_alloc() in <asm/pgtable.h>. The root
+ * table needs of course only to be allocated once in mmu_get_root_table_entry,
+ * so that here also some mmu specific initialization is done. The second page
+ * at the start of the kernel (the first page is unmapped later) is used for
+ * the kernel_pg_dir. It must be at a position known at link time (as it's used
+ * to initialize the init task struct) and since it needs special cache
+ * settings, it's the easiest to use this page, the rest of the page is used
+ * for further pointer tables.
+ * mmu_get_page_table_entry allocates always a whole page for page tables, this
+ * means 1024 pages and so 4MB of memory can be mapped. It doesn't make sense
+ * to manage page tables in smaller pieces as nearly all mappings have that
+ * size.
+ *
+ * ######################################################################
+ *
+ *
+ * ######################################################################
+ *
+ * mmu_engage
+ * ----------
+ *	Thanks to a small helping routine enabling the mmu got quite simple
+ * and there is only one way left. mmu_engage makes a complete a new mapping
+ * that only includes the absolute necessary to be able to jump to the final
+ * position and to restore the original mapping.
+ * As this code doesn't need a transparent translation register anymore this
+ * means all registers are free to be used by machines that needs them for
+ * other purposes.
+ *
+ * ######################################################################
+ *
+ * mmu_print
+ * ---------
+ *	This algorithm will print out the page tables of the system as
+ * appropriate for an 030 or an 040.  This is useful for debugging purposes
+ * and as such is enclosed in #ifdef MMU_PRINT/#endif clauses.
+ *
+ * ######################################################################
+ *
+ * console_init
+ * ------------
+ *	The console is also able to be turned off.  The console in head.S
+ * is specifically for debugging and can be very useful.  It is surrounded by
+ * #ifdef / #endif clauses so it doesn't have to ship in known-good
+ * kernels.  It's basic algorithm is to determine the size of the screen
+ * (in height/width and bit depth) and then use that information for
+ * displaying an 8x8 font or an 8x16 (widthxheight).  I prefer the 8x8 for
+ * debugging so I can see more good data.  But it was trivial to add support
+ * for both fonts, so I included it.
+ *	Also, the algorithm for plotting pixels is abstracted so that in
+ * theory other platforms could add support for different kinds of frame
+ * buffers.  This could be very useful.
+ *
+ * console_put_penguin
+ * -------------------
+ *	An important part of any Linux bring up is the penguin and there's
+ * nothing like getting the Penguin on the screen!  This algorithm will work
+ * on any machine for which there is a console_plot_pixel.
+ *
+ * console_scroll
+ * --------------
+ *	My hope is that the scroll algorithm does the right thing on the
+ * various platforms, but it wouldn't be hard to add the test conditions
+ * and new code if it doesn't.
+ *
+ * console_putc
+ * -------------
+ *
+ * ######################################################################
+ *
+ *	Register usage has greatly simplified within head.S. Every subroutine
+ * saves and restores all registers that it modifies (except it returns a
+ * value in there of course). So the only register that needs to be initialized
+ * is the stack pointer.
+ * All other init code and data is now placed in the init section, so it will
+ * be automatically freed at the end of the kernel initialization.
+ *
+ * ######################################################################
+ *
+ * options
+ * -------
+ *	There are many options available in a build of this file.  I've
+ * taken the time to describe them here to save you the time of searching
+ * for them and trying to understand what they mean.
+ *
+ * CONFIG_xxx:	These are the obvious machine configuration defines created
+ * during configuration.  These are defined in autoconf.h.
+ *
+ * CONSOLE_DEBUG:  Only supports a Mac frame buffer but could easily be
+ * extended to support other platforms.
+ *
+ * TEST_MMU:	This is a test harness for running on any given machine but
+ * getting an MMU dump for another class of machine.  The classes of machines
+ * that can be tested are any of the makes (Atari, Amiga, Mac, VME, etc.)
+ * and any of the models (030, 040, 060, etc.).
+ *
+ *	NOTE:	TEST_MMU is NOT permanent!  It is scheduled to be removed
+ *		When head.S boots on Atari, Amiga, Macintosh, and VME
+ *		machines.  At that point the underlying logic will be
+ *		believed to be solid enough to be trusted, and TEST_MMU
+ *		can be dropped.  Do note that that will clean up the
+ *		head.S code significantly as large blocks of #if/#else
+ *		clauses can be removed.
+ *
+ * MMU_NOCACHE_KERNEL:	On the Macintosh platform there was an inquiry into
+ * determing why devices don't appear to work.  A test case was to remove
+ * the cacheability of the kernel bits.
+ *
+ * MMU_PRINT:	There is a routine built into head.S that can display the
+ * MMU data structures.  It outputs its result through the serial_putc
+ * interface.  So where ever that winds up driving data, that's where the
+ * mmu struct will appear.
+ *
+ * SERIAL_DEBUG:	There are a series of putc() macro statements
+ * scattered through out the code to give progress of status to the
+ * person sitting at the console.  This constant determines whether those
+ * are used.
+ *
+ * DEBUG:	This is the standard DEBUG flag that can be set for building
+ *		the kernel.  It has the effect adding additional tests into
+ *		the code.
+ *
+ * FONT_6x11:
+ * FONT_8x8:
+ * FONT_8x16:
+ *		In theory these could be determined at run time or handed
+ *		over by the booter.  But, let's be real, it's a fine hard
+ *		coded value.  (But, you will notice the code is run-time
+ *		flexible!)  A pointer to the font's struct font_desc
+ *		is kept locally in Lconsole_font.  It is used to determine
+ *		font size information dynamically.
+ *
+ * Atari constants:
+ * USE_PRINTER:	Use the printer port for serial debug.
+ * USE_SCC_B:	Use the SCC port A (Serial2) for serial debug.
+ * USE_SCC_A:	Use the SCC port B (Modem2) for serial debug.
+ * USE_MFP:	Use the ST-MFP port (Modem1) for serial debug.
+ *
+ * Macintosh constants:
+ * MAC_USE_SCC_A: Use SCC port A (modem) for serial debug.
+ * MAC_USE_SCC_B: Use SCC port B (printer) for serial debug.
+ */
 
 #include <linux/linkage.h>
 #include <linux/init.h>

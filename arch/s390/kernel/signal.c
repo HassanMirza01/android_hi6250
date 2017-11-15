@@ -1,4 +1,13 @@
-
+/*
+ *    Copyright IBM Corp. 1999, 2006
+ *    Author(s): Denis Joseph Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
+ *
+ *    Based on Intel version
+ * 
+ *  Copyright (C) 1991, 1992  Linus Torvalds
+ *
+ *  1997-11-28  Modified for POSIX.1b signals by Richard Henderson
+ */
 
 #include <linux/sched.h>
 #include <linux/mm.h>

@@ -1134,7 +1134,17 @@ static inline void setup_spu_status_part1(struct spu_state *csa,
 	u32 status_P_I = SPU_STATUS_STOPPED_BY_STOP |SPU_STATUS_INVALID_INSTR;
 	u32 status_code;
 
-	
+	/* Restore, Step 27:
+	 *     If the CSA.SPU_Status[I,S,H,P]=1 then add the correct
+	 *     instruction sequence to the end of the SPU based restore
+	 *     code (after the "context restored" stop and signal) to
+	 *     restore the correct SPU status.
+	 *
+	 *     NOTE: Rather than modifying the SPU executable, we
+	 *     instead add a new 'stopped_status' field to the
+	 *     LSCSA.  The SPU-side restore reads this field and
+	 *     takes the appropriate action when exiting.
+	 */
 
 	status_code =
 	    (csa->prob.spu_status_R >> SPU_STOP_STATUS_SHIFT) & 0xFFFF;
@@ -1208,7 +1218,16 @@ static inline void setup_spu_status_part2(struct spu_state *csa,
 {
 	u32 mask;
 
-	
+	/* Restore, Step 28:
+	 *     If the CSA.SPU_Status[I,S,H,P,R]=0 then
+	 *     add a 'br *' instruction to the end of
+	 *     the SPU based restore code.
+	 *
+	 *     NOTE: Rather than modifying the SPU executable, we
+	 *     instead add a new 'stopped_status' field to the
+	 *     LSCSA.  The SPU-side restore reads this field and
+	 *     takes the appropriate action when exiting.
+	 */
 	mask = SPU_STATUS_INVALID_INSTR |
 	    SPU_STATUS_SINGLE_STEP |
 	    SPU_STATUS_STOPPED_BY_HALT |
