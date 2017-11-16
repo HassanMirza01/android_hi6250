@@ -897,7 +897,7 @@ static int sdcardfs_setattr(struct dentry *dentry, struct iattr *ia)
 	 * this user can change the lower inode: that should happen when
 	 * calling notify_change on the lower inode.
 	 */
-	err = inode_change_ok(inode, ia);
+	err = setattr_prepare(dentry, ia);
 
 	/* no vfs_XXX operations required, cred overriding will be skipped. wj */
 	if (!err) {
