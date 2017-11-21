@@ -11,7 +11,6 @@
  *  MMC card bus driver model
  */
 
-#include <linux/version.h>
 #include <linux/export.h>
 #include <linux/device.h>
 #include <linux/err.h>
@@ -27,15 +26,10 @@
 #include "sdio_cis.h"
 #include "bus.h"
 
-#define to_mmc_driver(d)       container_of(d, struct mmc_driver, drv)
+#define to_mmc_driver(d)	container_of(d, struct mmc_driver, drv)
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0))
 static ssize_t type_show(struct device *dev,
 	struct device_attribute *attr, char *buf)
-#else
-static ssize_t mmc_type_show(struct device *dev,
-	struct device_attribute *attr, char *buf)
-#endif
 {
 	struct mmc_card *card = mmc_dev_to_card(dev);
 
@@ -47,13 +41,11 @@ static ssize_t mmc_type_show(struct device *dev,
 	case MMC_TYPE_SDIO:
 		return sprintf(buf, "SDIO\n");
 	case MMC_TYPE_SD_COMBO:
-		/*cppcheck-suppress * */
 		return sprintf(buf, "SDcombo\n");
 	default:
 		return -EFAULT;
 	}
 }
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0))
 static DEVICE_ATTR_RO(type);
 
 static struct attribute *mmc_dev_attrs[] = {
@@ -61,12 +53,6 @@ static struct attribute *mmc_dev_attrs[] = {
 	NULL,
 };
 ATTRIBUTE_GROUPS(mmc_dev);
-#else
-static struct device_attribute mmc_dev_attrs[] = {
-	__ATTR(type, S_IRUGO, mmc_type_show, NULL),
-	__ATTR_NULL,
-};
-#endif
 
 /*
  * This currently matches any MMC driver to any MMC card - drivers
@@ -179,11 +165,10 @@ static void mmc_bus_shutdown(struct device *dev)
 		ret = host->bus_ops->shutdown(host);
 		if (ret){
 			pr_err("%s: error during bus shutdown,ret = %d\n",
-					mmc_hostname(host),ret);
+				mmc_hostname(host), ret);
 		}
 	}
 	printk("%s:%d --\n", __func__, __LINE__);
-
 	return;
 }
 
@@ -209,13 +194,11 @@ static int mmc_bus_suspend(struct device *dev)
 #endif
 	ret = host->bus_ops->suspend(host);
 	/*if bus_ops->suspend failed, need to pm_generic_resume*/
-#ifdef CONFIG_HISI_MMC
 	if (ret) {
 		pr_err("%s:%d bus_suspend failed ret=%d\n",
 			__func__, __LINE__, ret);
-		(void)pm_generic_resume(dev);
+		pm_generic_resume(dev);
 	}
-#endif
 	printk("%s:%d %d--\n", __func__, __LINE__, ret);
 	return ret;
 }
@@ -273,11 +256,7 @@ static const struct dev_pm_ops mmc_bus_pm_ops = {
 
 static struct bus_type mmc_bus_type = {
 	.name		= "mmc",
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1 , 0))
 	.dev_groups	= mmc_dev_groups,
-#else
-	.dev_attrs	= mmc_dev_attrs,
-#endif
 	.match		= mmc_bus_match,
 	.uevent		= mmc_bus_uevent,
 	.probe		= mmc_bus_probe,
