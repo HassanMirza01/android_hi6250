@@ -103,7 +103,7 @@ static struct inode *sdcardfs_iget(struct super_block *sb, struct inode *lower_i
 			      * instead.
 			      */
 			     lower_inode->i_ino, /* hashval */
-			     sdcardfs_inode_test, /* inode comparison function */
+			     sdcardfs_inode_test,	/* inode comparison function */
 			     sdcardfs_inode_set, /* inode init function */
 			     &data); /* data passed to test+set fxns */
 	if (!inode) {
@@ -174,16 +174,15 @@ static struct inode *sdcardfs_iget(struct super_block *sb, struct inode *lower_i
  * @sb: sdcardfs's super_block
  * @lower_path: the lower path (caller does path_get/put)
  */
-int sdcardfs_interpose(struct dentry *dentry,
-					 struct super_block *sb,
-					 struct path *lower_path,
+int sdcardfs_interpose(struct dentry *dentry, struct super_block *sb,
+		     struct path *lower_path,
 					 userid_t id)
 {
 	int err = 0;
 	struct inode *inode;
 	struct inode *lower_inode;
 	struct super_block *lower_sb;
-	struct sdcardfs_inode_info *info;
+
 	lower_inode = lower_path->dentry->d_inode;
 	lower_sb = sdcardfs_lower_super(sb);
 
@@ -204,29 +203,9 @@ int sdcardfs_interpose(struct dentry *dentry,
 		err = PTR_ERR(inode);
 		goto out;
 	}
-	info = SDCARDFS_I(inode);
-	if (!strcmp(dentry->d_name.name, "ApkScript"))
-		printk(KERN_ERR
-		       "dj_interpose_apk lower_inode->i_mode=%o, inode->i_mode=%o, info->d_mode=%o, dentry.name: %s\n",
-		       lower_inode->i_mode, inode->i_mode, info->d_mode,
-		       dentry->d_name.name);
-	if (!strcmp(dentry->d_name.name, "ShellScript"))
-		printk(KERN_ERR
-		       "dj_interpose_shell lower_inode->i_mode=%o, inode->i_mode=%o, info->d_mode=%o, dentry.name: %s\n",
-		       lower_inode->i_mode, inode->i_mode, info->d_mode,
-		       dentry->d_name.name);
+
 	d_add(dentry, inode);
 	update_derived_permission(dentry);
-	if (!strcmp(dentry->d_name.name, "ApkScript"))
-		printk(KERN_ERR
-		       "dj_interpose_apk2 lower_inode->i_mode=%o, inode->i_mode=%o, info->d_mode=%o, dentry.name %s\n",
-		       lower_inode->i_mode, inode->i_mode, info->d_mode,
-		       dentry->d_name.name);
-	if (!strcmp(dentry->d_name.name, "ShellScript"))
-		printk(KERN_ERR
-		       "dj_interpose_shell2 lower_inode->i_mode=%o, inode->i_mode=%o, info->d_mode=%o, dentry.name %s\n",
-		       lower_inode->i_mode, inode->i_mode, info->d_mode,
-		       dentry->d_name.name);
 out:
 	return err;
 }
@@ -265,38 +244,34 @@ static struct dentry *__sdcardfs_lookup(struct dentry *dentry,
 	/* Use vfs_path_lookup to check if the dentry exists or not */
 	if (sbi->options.lower_fs == LOWER_FS_EXT4) {
 		err = vfs_path_lookup(lower_dir_dentry, lower_dir_mnt, name,
-				      LOOKUP_CASE_INSENSITIVE, &lower_path);
+				LOOKUP_CASE_INSENSITIVE, &lower_path);
 	} else if (sbi->options.lower_fs == LOWER_FS_FAT) {
 		err = vfs_path_lookup(lower_dir_dentry, lower_dir_mnt, name, 0,
-				      &lower_path);
+				&lower_path);
 	}
 
 	/* no error: handle positive dentries */
 	if (!err) {
 		/* check if the dentry is an obb dentry
 		 * if true, the lower_inode must be replaced with
-		 * the inode of the graft path
-		 */
+		 * the inode of the graft path */
 
-		if (need_graft_path(dentry)) {
+		if(need_graft_path(dentry)) {
 
 			/* setup_obb_dentry()
-			 * The lower_path will be stored to the dentry's orig_path
+ 			 * The lower_path will be stored to the dentry's orig_path
 			 * and the base obbpath will be copyed to the lower_path variable.
 			 * if an error returned, there's no change in the lower_path
-			 * returns: -ERRNO if error (0: no error)
-			 */
+			 * 		returns: -ERRNO if error (0: no error) */
 			err = setup_obb_dentry(dentry, &lower_path);
 
-			if (err) {
+			if(err) {
 				/* if the sbi->obbpath is not available, we can optionally
 				 * setup the lower_path with its orig_path.
 				 * but, the current implementation just returns an error
 				 * because the sdcard daemon also regards this case as
-				 * a lookup fail.
-				 */
-				printk(KERN_INFO
-				       "sdcardfs: base obbpath is not available\n");
+				 * a lookup fail. */
+				printk(KERN_INFO "sdcardfs: base obbpath is not available\n");
 				sdcardfs_put_reset_orig_path(dentry);
 				goto out;
 			}
@@ -304,7 +279,7 @@ static struct dentry *__sdcardfs_lookup(struct dentry *dentry,
 
 		sdcardfs_set_lower_path(dentry, &lower_path);
 		err = sdcardfs_interpose(dentry, dentry->d_sb, &lower_path, id);
-		if (err)	/* path_put underlying path on error */
+		if (err) /* path_put underlying path on error */
 			sdcardfs_put_reset_lower_path(dentry);
 		goto out;
 	}
@@ -349,9 +324,9 @@ out:
 
 /*
  * On success:
- * fills dentry object appropriate values and returns NULL.
+ * 	fills dentry object appropriate values and returns NULL.
  * On fail (== error)
- * returns error ptr
+ * 	returns error ptr
  *
  * @dir : Parent inode. It is locked (dir->i_mutex)
  * @dentry : Target dentry to lookup. we should set each of fields.
@@ -369,15 +344,14 @@ struct dentry *sdcardfs_lookup(struct inode *dir, struct dentry *dentry,
 
 	parent = dget_parent(dentry);
 
-	if (!check_caller_access_to_name(parent->d_inode, dentry->d_name.name,
-					 sbi->options.derive, 0, 0)) {
+	if(!check_caller_access_to_name(parent->d_inode, dentry->d_name.name,
+						sbi->options.derive, 0, 0)) {
 		ret = ERR_PTR(-EACCES);
-		printk(KERN_INFO
-		       "%s: need to check the caller's gid in packages.list\n"
-		       "	dentry: %s, task:%s\n", __func__,
-		       dentry->d_name.name, current->comm);
+		printk(KERN_INFO "%s: need to check the caller's gid in packages.list\n"
+                         "	dentry: %s, task:%s\n",
+						 __func__, dentry->d_name.name, current->comm);
 		goto out_err;
-	}
+        }
 
 	/* save current_cred and override it */
 	OVERRIDE_CRED_PTR(SDCARDFS_SB(dir->i_sb), saved_cred);
@@ -393,7 +367,9 @@ struct dentry *sdcardfs_lookup(struct inode *dir, struct dentry *dentry,
 
 	ret = __sdcardfs_lookup(dentry, flags, &lower_parent_path, SDCARDFS_I(dir)->userid);
 	if (IS_ERR(ret))
+	{
 		goto out;
+	}
 	if (ret)
 		dentry = ret;
 	if (dentry->d_inode) {

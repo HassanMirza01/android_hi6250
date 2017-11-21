@@ -82,7 +82,7 @@ static void sdcardfs_put_super(struct super_block *sb)
 	if (spd->devpath)
 		kfree(spd->devpath);
 
-	if (spd->obbpath_s) {
+	if(spd->obbpath_s) {
 		kfree(spd->obbpath_s);
 		path_put(&spd->obbpath);
 	}
@@ -92,7 +92,7 @@ static void sdcardfs_put_super(struct super_block *sb)
 	sdcardfs_set_lower_super(sb, NULL);
 	atomic_dec(&s->s_active);
 
-	if (spd->pkgl_id)
+	if(spd->pkgl_id)
 		packagelist_destroy(spd->pkgl_id);
 
 	sdcardfs_remove_super(spd);
@@ -141,8 +141,7 @@ static int sdcardfs_statfs(struct dentry *dentry, struct kstatfs *buf)
  * @flags: numeric mount options
  * @options: mount options string
  */
-static int sdcardfs_remount_fs(struct super_block *sb, int *flags,
-			       char *options)
+static int sdcardfs_remount_fs(struct super_block *sb, int *flags, char *options)
 {
 	int err = 0;
 
@@ -215,9 +214,9 @@ int sdcardfs_init_inode_cache(void)
 	int err = 0;
 
 	sdcardfs_inode_cachep =
-	    kmem_cache_create("sdcardfs_inode_cache",
-			      sizeof(struct sdcardfs_inode_info), 0,
-			      SLAB_RECLAIM_ACCOUNT, init_once);
+		kmem_cache_create("sdcardfs_inode_cache",
+				  sizeof(struct sdcardfs_inode_info), 0,
+				  SLAB_RECLAIM_ACCOUNT, init_once);
 	if (!sdcardfs_inode_cachep)
 		err = -ENOMEM;
 	return err;
@@ -267,13 +266,13 @@ static int sdcardfs_show_options(struct seq_file *m, struct dentry *root)
 };
 
 const struct super_operations sdcardfs_sops = {
-	.put_super = sdcardfs_put_super,
-	.statfs = sdcardfs_statfs,
-	.remount_fs = sdcardfs_remount_fs,
-	.evict_inode = sdcardfs_evict_inode,
-	.umount_begin = sdcardfs_umount_begin,
-	.show_options = sdcardfs_show_options,
-	.alloc_inode = sdcardfs_alloc_inode,
-	.destroy_inode = sdcardfs_destroy_inode,
-	.drop_inode = generic_delete_inode,
+	.put_super	= sdcardfs_put_super,
+	.statfs		= sdcardfs_statfs,
+	.remount_fs	= sdcardfs_remount_fs,
+	.evict_inode	= sdcardfs_evict_inode,
+	.umount_begin	= sdcardfs_umount_begin,
+	.show_options	= sdcardfs_show_options,
+	.alloc_inode	= sdcardfs_alloc_inode,
+	.destroy_inode	= sdcardfs_destroy_inode,
+	.drop_inode	= generic_delete_inode,
 };

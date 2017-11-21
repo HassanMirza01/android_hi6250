@@ -90,11 +90,11 @@ typedef __uint32_t __psunsigned_t;
 */
 
 /* OVERRIDE_CRED() and REVERT_CRED()
- *	OVERRID_CRED()
- *		backup original task->cred
- *		and modifies task->cred->fsuid/fsgid to specified value.
+ * 	OVERRID_CRED()
+ * 		backup original task->cred
+ * 		and modifies task->cred->fsuid/fsgid to specified value.
  *	REVERT_CRED()
- *		restore original task->cred->fsuid/fsgid.
+ * 		restore original task->cred->fsuid/fsgid.
  * These two macro should be used in pair, and OVERRIDE_CRED() should be
  * placed at the beginning of a function, right after variable declaration.
  */
@@ -109,9 +109,9 @@ typedef __uint32_t __psunsigned_t;
 #define REVERT_CRED(saved_cred)	revert_fsids(saved_cred)
 
 #define DEBUG_CRED()		\
-	printk("KAKJAGI: %s:%d fsuid %d fsgid %d\n",	\
-		__FUNCTION__, __LINE__,			\
-		(int)current->cred->fsuid,		\
+	printk("KAKJAGI: %s:%d fsuid %d fsgid %d\n", 	\
+		__FUNCTION__, __LINE__, 		\
+		(int)current->cred->fsuid, 		\
 		(int)current->cred->fsgid);
 
 /* Android 4.4 support */
@@ -154,9 +154,9 @@ struct sdcardfs_sb_info;
 struct sdcardfs_mount_options;
 
 /* Do not directly use this function. Use OVERRIDE_CRED() instead. */
-const struct cred *override_fsids(struct sdcardfs_sb_info *sbi);
+const struct cred * override_fsids(struct sdcardfs_sb_info* sbi);
 /* Do not directly use this function, use REVERT_CRED() instead. */
-void revert_fsids(const struct cred *old_cred);
+void revert_fsids(const struct cred * old_cred);
 
 /* operations vectors defined in specific files */
 extern const struct file_operations sdcardfs_main_fops;
@@ -176,9 +176,9 @@ extern void sdcardfs_destroy_dentry_cache(void);
 extern int new_dentry_private_data(struct dentry *dentry);
 extern void free_dentry_private_data(struct dentry *dentry);
 extern struct dentry *sdcardfs_lookup(struct inode *dir, struct dentry *dentry,
-				      unsigned int flags);
+				unsigned int flags);
 extern int sdcardfs_interpose(struct dentry *dentry, struct super_block *sb,
-			      struct path *lower_path, userid_t id);
+			    struct path *lower_path, userid_t id);
 /*
  *  namei.c
  */
@@ -393,7 +393,7 @@ static inline void sdcardfs_put_reset_##pname(const struct dentry *dent) \
 { \
 	struct path pname; \
 	spin_lock(&SDCARDFS_D(dent)->lock); \
-	if (SDCARDFS_D(dent)->pname.dentry) { \
+	if(SDCARDFS_D(dent)->pname.dentry) { \
 		pathcpy(&pname, &SDCARDFS_D(dent)->pname); \
 		SDCARDFS_D(dent)->pname.dentry = NULL; \
 		SDCARDFS_D(dent)->pname.mnt = NULL; \
@@ -434,7 +434,7 @@ static inline void sdcardfs_get_real_lower(const struct dentry *dent,
 	/* in case of a local obb dentry
 	 * the orig_path should be returned
 	 */
-	if (has_graft_path(dent))
+	if(has_graft_path(dent))
 		sdcardfs_get_orig_path(dent, real_lower);
 	else
 		sdcardfs_get_lower_path(dent, real_lower);
@@ -443,7 +443,7 @@ static inline void sdcardfs_get_real_lower(const struct dentry *dent,
 static inline void sdcardfs_put_real_lower(const struct dentry *dent,
 						struct path *real_lower)
 {
-	if (has_graft_path(dent))
+	if(has_graft_path(dent))
 		sdcardfs_put_orig_path(dent, real_lower);
 	else
 		sdcardfs_put_lower_path(dent, real_lower);
@@ -456,21 +456,18 @@ void sdcardfs_add_super(struct sdcardfs_sb_info *, struct super_block *);
 /* for packagelist.c */
 extern int get_caller_has_rw_locked(void *pkgl_id, derive_t derive);
 extern appid_t get_appid(void *pkgl_id, const char *app_name);
-extern int check_caller_access_to_name(struct inode *parent_node,
-				       const char *name, derive_t derive,
-				       int w_ok, int has_rw);
+extern int check_caller_access_to_name(struct inode *parent_node, const char* name,
+                                        derive_t derive, int w_ok, int has_rw);
 extern int open_flags_to_access_mode(int open_flags);
-extern void *packagelist_create(gid_t write_gid);
+extern void * packagelist_create(gid_t write_gid);
 extern void packagelist_destroy(void *pkgl_id);
 extern int packagelist_init(void);
 extern void packagelist_exit(void);
 
 /* for derived_perm.c */
 extern void setup_derived_state(struct inode *inode, perm_t perm,
-				userid_t userid, uid_t uid, gid_t gid,
-				mode_t mode);
-extern void get_derived_permission(struct dentry *parent,
-				   struct dentry *dentry);
+			userid_t userid, uid_t uid, gid_t gid, mode_t mode);
+extern void get_derived_permission(struct dentry *parent, struct dentry *dentry);
 extern void update_derived_permission(struct dentry *dentry);
 extern int need_graft_path(struct dentry *dentry);
 extern int is_base_obbpath(struct dentry *dentry);
@@ -481,13 +478,13 @@ extern int setup_obb_dentry(struct dentry *dentry, struct path *lower_path);
 static inline struct dentry *lock_parent(struct dentry *dentry)
 {
 	struct dentry *dir = dget_parent(dentry);
-	mutex_lock_nested(&dir->d_inode->i_mutex, I_MUTEX_PARENT2);
+	mutex_lock_nested(&d_inode(dir)->i_mutex, I_MUTEX_PARENT2);
 	return dir;
 }
 
 static inline void unlock_dir(struct dentry *dir)
 {
-	mutex_unlock(&dir->d_inode->i_mutex);
+	mutex_unlock(&d_inode(dir)->i_mutex);
 	dput(dir);
 }
 
@@ -495,12 +492,11 @@ static inline int prepare_dir(const char *path_s, uid_t uid, gid_t gid, mode_t m
 {
 	int err;
 	struct dentry *dent;
-	struct path path;
 	struct iattr attrs;
+	struct path parent;
 	struct inode *delegated_inode = NULL;
 
-	dent = kern_path_create(AT_FDCWD, path_s, &path, LOOKUP_DIRECTORY);
-
+	dent = kern_path_create(AT_FDCWD, path_s, &parent, LOOKUP_DIRECTORY);
 	if (IS_ERR(dent)) {
 		err = PTR_ERR(dent);
 		if (err == -EEXIST)
@@ -508,11 +504,11 @@ static inline int prepare_dir(const char *path_s, uid_t uid, gid_t gid, mode_t m
 		return err;
 	}
 
-	err = mnt_want_write(path.mnt);
+	err = mnt_want_write(parent.mnt);
 	if (err)
 		goto out;
 
-	err = vfs_mkdir(path.dentry->d_inode, dent, mode);
+	err = vfs_mkdir(d_inode(parent.dentry), dent, mode);
 	if (err) {
 		if (err == -EEXIST)
 			err = 0;
@@ -523,9 +519,9 @@ static inline int prepare_dir(const char *path_s, uid_t uid, gid_t gid, mode_t m
 	attrs.ia_gid = xfs_gid_to_kgid(gid);
 	attrs.ia_valid = ATTR_UID | ATTR_GID;
 retry_deleg:
-	mutex_lock(&dent->d_inode->i_mutex);
+	mutex_lock(&d_inode(dent)->i_mutex);
 	err = notify_change(dent, &attrs, &delegated_inode);
-	mutex_unlock(&dent->d_inode->i_mutex);
+	mutex_unlock(&d_inode(dent)->i_mutex);
 	if (delegated_inode) {
 		err = break_deleg_wait(&delegated_inode);
 		if (!err)
@@ -533,13 +529,13 @@ retry_deleg:
 	}
 
 out_drop:
-	mnt_drop_write(path.mnt);
+	mnt_drop_write(parent.mnt);
 
 out:
 	dput(dent);
 	/* parent dentry locked by kern_path_create */
-	mutex_unlock(&path.dentry->d_inode->i_mutex);
-	path_put(&path);
+	mutex_unlock(&d_inode(parent.dentry)->i_mutex);
+	path_put(&parent);
 	return err;
 }
 

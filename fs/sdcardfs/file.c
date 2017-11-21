@@ -51,8 +51,8 @@ static ssize_t sdcardfs_read(struct file *file, char __user *buf,
 	err = vfs_read(lower_file, buf, count, ppos);
 	/* update our inode atime upon a successful lower read */
 	if (err >= 0)
-		fsstack_copy_attr_atime(dentry->d_inode,
-					lower_file->f_path.dentry->d_inode);
+		fsstack_copy_attr_atime(d_inode(dentry),
+					file_inode(lower_file));
 
 	return err;
 }
@@ -86,8 +86,8 @@ static ssize_t sdcardfs_read_iter(struct kiocb *iocb, struct iov_iter *to)
 	err = vfs_iter_read(lower_file, to, &iocb->ki_pos);
 	/* update our inode atime upon a successful lower read */
 	if (err >= 0)
-		fsstack_copy_attr_atime(dentry->d_inode,
-					lower_file->f_path.dentry->d_inode);
+		fsstack_copy_attr_atime(d_inode(dentry),
+					file_inode(lower_file));
 
 	return err;
 }
@@ -113,17 +113,17 @@ static ssize_t sdcardfs_write_iter(struct kiocb *iocb, struct iov_iter *from)
 	err = vfs_iter_write(lower_file, from, &iocb->ki_pos);
 	/* update our inode times+sizes upon a successful lower write */
 	if (err >= 0) {
-		fsstack_copy_inode_size(dentry->d_inode,
-					lower_file->f_path.dentry->d_inode);
-		fsstack_copy_attr_times(dentry->d_inode,
-					lower_file->f_path.dentry->d_inode);
+		fsstack_copy_inode_size(d_inode(dentry),
+					file_inode(lower_file));
+		fsstack_copy_attr_times(d_inode(dentry),
+					file_inode(lower_file));
 	}
 
 	return err;
 }
 
 static ssize_t sdcardfs_write(struct file *file, const char __user *buf,
-			      size_t count, loff_t *ppos)
+			    size_t count, loff_t *ppos)
 {
 	int err = 0;
 	struct file *lower_file;
@@ -139,10 +139,10 @@ static ssize_t sdcardfs_write(struct file *file, const char __user *buf,
 	err = vfs_write(lower_file, buf, count, ppos);
 	/* update our inode times+sizes upon a successful lower write */
 	if (err >= 0) {
-		fsstack_copy_inode_size(dentry->d_inode,
-					lower_file->f_path.dentry->d_inode);
-		fsstack_copy_attr_times(dentry->d_inode,
-					lower_file->f_path.dentry->d_inode);
+		fsstack_copy_inode_size(d_inode(dentry),
+					file_inode(lower_file));
+		fsstack_copy_attr_times(d_inode(dentry),
+					file_inode(lower_file));
 	}
 
 	return err;
@@ -160,8 +160,8 @@ static int sdcardfs_readdir(struct file *file, struct dir_context *ctx)
 	err = iterate_dir(lower_file, ctx);
 	file->f_pos = lower_file->f_pos;
 	if (err >= 0)		/* copy the atime */
-		fsstack_copy_attr_atime(dentry->d_inode,
-					lower_file->f_path.dentry->d_inode);
+		fsstack_copy_attr_atime(d_inode(dentry),
+					file_inode(lower_file));
 	return err;
 }
 
@@ -239,8 +239,7 @@ static int sdcardfs_mmap(struct file *file, struct vm_area_struct *vma)
 	if (!SDCARDFS_F(file)->lower_vm_ops) {
 		err = lower_file->f_op->mmap(lower_file, vma);
 		if (err) {
-			printk(KERN_ERR "sdcardfs: lower mmap failed %d\n",
-			       err);
+			printk(KERN_ERR "sdcardfs: lower mmap failed %d\n", err);
 			goto out;
 		}
 	}
@@ -253,8 +252,8 @@ static int sdcardfs_mmap(struct file *file, struct vm_area_struct *vma)
 	fput(file);
 	get_file(lower_file);
 	vma->vm_file = lower_file;
-	file->f_mapping->a_ops = &sdcardfs_aops;	/* set our aops */
-	if (!SDCARDFS_F(file)->lower_vm_ops)	/* save for our ->fault */
+	file->f_mapping->a_ops = &sdcardfs_aops; /* set our aops */
+	if (!SDCARDFS_F(file)->lower_vm_ops) /* save for our ->fault */
 		SDCARDFS_F(file)->lower_vm_ops = saved_vm_ops;
 
 out:
@@ -280,11 +279,11 @@ static int sdcardfs_open(struct inode *inode, struct file *file)
 
 	has_rw = get_caller_has_rw_locked(sbi->pkgl_id, sbi->options.derive);
 
-	if (!check_caller_access_to_name(parent->d_inode, dentry->d_name.name,
-					 sbi->options.derive,
+	if(!check_caller_access_to_name(parent->d_inode, dentry->d_name.name,
+				sbi->options.derive,
 				open_flags_to_access_mode(file->f_flags), has_rw)) {
 		printk(KERN_INFO "%s: need to check the caller's gid in packages.list\n"
-						"	dentry: %s, task:%s\n",
+                         "	dentry: %s, task:%s\n",
 						 __func__, dentry->d_name.name, current->comm);
 		err = -EACCES;
 		goto out_err;
