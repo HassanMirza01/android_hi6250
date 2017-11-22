@@ -34,9 +34,6 @@
 #include <linux/stacktrace.h>
 #include <linux/prefetch.h>
 #include <linux/memcontrol.h>
-#ifdef CONFIG_HW_STAT_MM
-#include <huawei_platform/linux/stat_mm.h>
-#endif
 #include <linux/hisi/page_tracker.h>
 #include <linux/hisi/rdr_hisi_ap_hook.h>
 #include <trace/events/kmem.h>
@@ -3403,11 +3400,6 @@ void *__kmalloc(size_t size, gfp_t flags)
                 (unsigned long long)virt_to_phys(ret), (unsigned int)size);
 
 	kasan_kmalloc(s, ret, size);
-
-#ifdef CONFIG_HW_STAT_MM
-	if(ret != NULL)
-		STAT_MM_BUDDY_SLUB_BIG(size);
-#endif
 
 	return ret;
 }

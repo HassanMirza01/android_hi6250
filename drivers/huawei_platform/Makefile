@@ -15,7 +15,6 @@ obj-$(CONFIG_INPUTHUB)   += inputhub/iom7/
 
 obj-$(CONFIG_MAXQ616_POWER_SWITCH) += irda/
 obj-$(CONFIG_LOGGER_EXTEND) += log/
-obj-$(CONFIG_HW_STAT_MM) += mm/
 obj-$(CONFIG_NFC_DEVICES)   += nfc/
 obj-$(CONFIG_HW_WIFI)   += net/
 obj-y   += power/

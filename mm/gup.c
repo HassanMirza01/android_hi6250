@@ -12,10 +12,8 @@
 #include <linux/sched.h>
 #include <linux/rwsem.h>
 #include <linux/hugetlb.h>
+
 #include <asm/pgtable.h>
-#ifdef CONFIG_HW_STAT_MM
-#include <huawei_platform/linux/stat_mm.h>
-#endif
 
 #include "internal.h"
 
@@ -946,9 +944,6 @@ int __mm_populate(unsigned long start, unsigned long len, int ignore_errors)
 	}
 	if (locked)
 		up_read(&mm->mmap_sem);
-#ifdef CONFIG_HW_STAT_MM
-	STAT_MM_MLOCK_IF(start, len, current->mm->locked_vm);
-#endif
 	return ret;	/* 0 or negative error code */
 }
 
