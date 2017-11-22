@@ -162,63 +162,6 @@ void del_page_from_protect_lru_list(struct page *page, struct lruvec *lruvec)
 }
 EXPORT_SYMBOL(del_page_from_protect_lru_list);
 
-/*lint -save -e715 -e713*/
-static ssize_t proc_protect_lru_write(struct file *file,
-				const char __user *buf,
-				size_t count, loff_t *ppos)
-{
-	struct task_struct *task;
-	char buffer[PROC_NUMBUF] = {0};
-	int protect, err;
-
-	if (count > sizeof(buffer) - 1)
-		count = sizeof(buffer) - 1;
-	if (copy_from_user(buffer, buf, count))
-		return -EFAULT;
-	err = kstrtoint(strstrip(buffer), 0, &protect);
-	if (err)
-		return -EINVAL;
-
-	task = get_proc_task(file_inode(file));
-	if (!task || !task->mm)
-		return -ESRCH;
-	if (protect >= 0 && protect <= PROTECT_HEAD_END) {
-		task->mm->protect = protect;
-		put_task_struct(task);
-		return count;
-	} else {
-		put_task_struct(task);
-		return -EINVAL;
-	}
-}
-/*lint -restore*/
-
-static ssize_t proc_protect_lru_read(struct file *file, char __user *buf,
-				size_t count, loff_t *ppos)
-{
-	struct task_struct *task;
-	char buffer[PROC_NUMBUF];
-	size_t len;
-
-	task = get_proc_task(file_inode(file));
-	if (!task || !task->mm)
-		return -ESRCH;
-	/*lint -save -e732*/
-	len = snprintf(buffer, sizeof(buffer), "%d\n", task->mm->protect);
-	/*lint -restore*/
-
-	put_task_struct(task);
-
-	return simple_read_from_buffer(buf, count, ppos, buffer, len);
-}
-
-/*lint -save -e785*/
-const struct file_operations proc_protect_lru_operations = {
-	.write	= proc_protect_lru_write,
-	.read	= proc_protect_lru_read,
-};
-/*lint -restore*/
-
 void protect_lruvec_init(struct lruvec *lruvec)
 {
 	enum lru_list lru;

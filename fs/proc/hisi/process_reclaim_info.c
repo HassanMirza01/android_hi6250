@@ -98,7 +98,7 @@ void process_reclaim_result_write(struct task_struct *task,
 	task_lock(task);
 	if (!task->proc_reclaimed_result) {
 		task_unlock(task);
-		result  = process_reclaim_result_cache_alloc(GFP_IOFS);
+		result  = process_reclaim_result_cache_alloc(__GFP_NOWARN | __GFP_NORETRY);
 
 		task_lock(task);
 		if (!task->proc_reclaimed_result) {

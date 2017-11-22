@@ -45,7 +45,7 @@ config PROC_VMCORE
 
 config TASK_PROTECT_LRU
 	bool "protect lru of a process"
-	depends on !TRANSPARENT_HUGEPAGE && !HUGETLB_PAGE && !MEMCG
+	depends on !TRANSPARENT_HUGEPAGE && !HUGETLB_PAGE && !MEMCG && (ARM64 || X86_64)
 	default n
 	help
 	  Protect lru of task support. It's between normal lru and mlock,
