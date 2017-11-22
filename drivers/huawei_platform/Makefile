@@ -2,7 +2,6 @@
 #=============================================================================
 
 obj-$(CONFIG_HW_ANTENNA_BOARD_MATCH)  += antenna_board_match/
-obj-$(CONFIG_ANTENNA_FPGA) += antenna_fpga/
 obj-$(CONFIG_HUAWEI_AUDIO) += audio/
 obj-$(CONFIG_CHR_NETLINK_MODULE)   += chr/
 obj-y   += connectivity/
