@@ -3795,10 +3795,6 @@ static void __setscheduler_params(struct task_struct *p,
 	set_load_weight(p);
 }
 
-#ifdef CONFIG_HISI_RT_OPT
-void hisi_get_slow_cpus(struct cpumask *cpumask);
-#endif
-
 /* Actually do priority change: must hold pi & rq lock. */
 static void __setscheduler(struct rq *rq, struct task_struct *p,
 			   const struct sched_attr *attr, bool keep_boost)
@@ -3818,18 +3814,6 @@ static void __setscheduler(struct rq *rq, struct task_struct *p,
 		p->sched_class = &dl_sched_class;
 	else if (rt_prio(p->prio)) {
 		p->sched_class = &rt_sched_class;
-#ifdef CONFIG_HISI_RT_OPT
-		struct cpumask slow_cpus;
-		hisi_get_slow_cpus(&slow_cpus);
-
-		if (!cpumask_empty(&slow_cpus)
-			&& cpumask_equal(&p->cpus_allowed, cpu_all_mask)
-		    && cpumask_intersects(&slow_cpus, &p->cpus_allowed)) {
-			p->nr_cpus_allowed =
-					cpumask_weight(&slow_cpus);
-			do_set_cpus_allowed(p, &slow_cpus);
-		}
-#endif
 	}
 	else
 		p->sched_class = &fair_sched_class;

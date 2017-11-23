@@ -1276,12 +1276,6 @@ config HISI_FORKBOOST
 	help
 	  Boost the new fork thread if not kernel thread.
 
-config HISI_RT_OPT
-	bool "hisilicon rt-threads optimization"
-	default n
-	help
-	  Limit rt-threads to little cpus for power saving.
-
 config SCHED_AUTOGROUP
 	bool "Automatic process group scheduling"
 	select CGROUPS
