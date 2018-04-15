@@ -77,6 +77,26 @@ config IOSCHED_SIO
  	  ensure fairness. The algorithm does not do any sorting but
  	  basic merging, trying to keep a minimum overhead. It is aimed
  	  mainly for aleatory access devices (eg: flash devices).
+<<<<<<< HEAD
+=======
+ 	  
+config IOSCHED_SIOPLUS
+	tristate "Simple I/O scheduler plus"
+	default y
+	---help---
+	  The Simple I/O scheduler is an extremely simple scheduler,
+	  based on noop and deadline, that relies on deadlines to
+	  ensure fairness. The algorithm does not do any sorting but
+	  basic merging, trying to keep a minimum overhead. It is aimed
+	  mainly for aleatory access devices (eg: flash devices).
+
+config IOSCHED_ZEN
+	tristate "Zen I/O scheduler"
+	default y
+	---help---
+	  FCFS, dispatches are back-inserted, deadlines ensure fairness.
+	  Should work best with devices where there is no travel delay.
+>>>>>>> 9f88e93... Added SioPlus io
 
 config CFQ_GROUP_IOSCHED
 	bool "CFQ Group Scheduling support"
@@ -115,9 +135,18 @@ choice
 
  	config DEFAULT_SIO
  		bool "SIO" if IOSCHED_SIO=y
+<<<<<<< HEAD
 
 	config DEFAULT_NOOP
 		bool "No-op"
+=======
+ 		
+    config DEFAULT_SIOPLUS
+		bool "SIOPLUS" if IOSCHED_SIOPLUS=y
+ 		
+    config DEFAULT_ZEN
+		bool "ZEN" if IOSCHED_ZEN=y
+>>>>>>> 9f88e93... Added SioPlus io
 
 endchoice
 
@@ -130,6 +159,14 @@ config DEFAULT_IOSCHED
         default "sio" if DEFAULT_SIO
         default "fiops" if DEFAULT_FIOPS
 	default "noop" if DEFAULT_NOOP
+<<<<<<< HEAD
+=======
+    default "tripndroid" if DEFAULT_TRIPNDROID
+    default "fiops" if DEFAULT_FIOPS
+    default "sio" if DEFAULT_SIO
+    default "sioplus" if DEFAULT_SIOPLUS
+    default "zen" if DEFAULT_ZEN
+>>>>>>> 9f88e93... Added SioPlus io
 
 endmenu
 
