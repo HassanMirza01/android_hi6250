@@ -3,3 +3,76 @@ config MAKO_HOTPLUG
  	default n
  	help
  	  Mako Hotplug: A custom hotplug MOD by fransico franco
+<<<<<<< HEAD
+=======
+
+config ALUCARD_HOTPLUG
+	bool "Enable alucard-hotplug cpu hotplug driver"
+	default n
+	help
+	  Generic Alucard-hotplug cpu hotplug driver for ARM SOCs
+
+config INTELLI_HOTPLUG
+        bool "Enable intelli-plug cpu hotplug driver"
+        default n
+        help
+          Generic Intelli-plug cpu hotplug driver for ARM SOCs
+
+config THUNDERPLUG_CONTROL
+	bool "Enable plugging down/up of cores based on load per core"
+	default n
+	help
+	  This driver hotplugs cpu cores based on per-core load
+
+config BLU_HOTPLUG
+        default n
+
+config INTELLI_HOTPLUG
+        default n
+
+config LAZY_HOTPLUG
+        default n
+
+config BRICKED_HOTPLUG
+        default n
+
+config FAST_HOTPLUG
+        default n
+
+config ZEN_DECISION
+	bool "Zen Decision: MSM Userspace Handler"
+	depends on SMP && FB
+	default n
+	help
+	  MSM/Qcomm devices have multiple userspace applications that handle
+	  CPU hotplugging and frequency operations.
+
+	  ZenDecision is a "handler" to account for behavior caused by
+	  disabling some of these services.
+
+	  For example, If MPDecision is disabled and MSM-Thermal_Engine is 
+	  enabled in the userspace. Situations where CPUs go offline but never
+	  come back online occur. ZenDecision handles the situation of CPUs
+	  never coming online when they are supposed.
+  
+	  ZenDecision ensures all CPUs are online when they are supposed to be by:
+	  - Enable all CPUs when screen comes on after wake_wait_delay
+	  - Ignore all CPU_UP operations when battery level is <= 15% to respect
+	    decisions of MSMThermal.
+
+	  Userspace tunables for ZenDecision (/sys/kernel/zen_decision):
+	  - enabled (0 or 1): Enable or disable the driver.
+	  - wake_wait_time (0-60000): How long to wait before executing CPU_UP work.
+	  - bat_threshold_ignore (0-100, 0=disabled): Don't do any CPU_UP work up to
+	     this battery charge level.
+
+	  WARNING: ZenDecision is not a direct replacement for any of the MSM userspace
+	  services. It is simply designed to "handle" specific behaviors that are caused
+	  by disabling these services.
+
+	  If unsure, say N.
+
+config HIMA_HOTPLUG
+	default n
+
+>>>>>>> 422ad89... Hotplugs: Added Hima & thunderplug
