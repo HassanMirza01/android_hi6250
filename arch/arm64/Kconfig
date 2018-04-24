@@ -1058,6 +1058,8 @@ source "security/Kconfig"
 source "crypto/Kconfig"
 if CRYPTO
 source "arch/arm64/crypto/Kconfig"
+
+source "arch/arm64/hotplug/Kconfig"
 endif
 
 source "lib/Kconfig"

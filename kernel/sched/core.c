@@ -6229,6 +6229,8 @@ static int __init isolated_cpu_setup(char *str)
 
 __setup("isolcpus=", isolated_cpu_setup);
 
+int sched_smt_power_savings = 0, sched_mc_power_savings = 4;
+
 struct s_data {
 	struct sched_domain ** __percpu sd;
 	struct root_domain	*rd;
