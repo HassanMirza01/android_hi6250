@@ -82,7 +82,7 @@ static const unsigned freqs[] = { 400000, 300000, 200000, 100000 };
  * So we allow it it to be disabled.
  */
 bool use_spi_crc = 0;
-module_param(use_spi_crc, bool, 0);
+module_param(use_spi_crc, bool, 0664);
 
 static struct dentry *dentry_mmclog;
 u64 rwlog_enable_flag = 0;   /* 0 : Disable , 1: Enable */
