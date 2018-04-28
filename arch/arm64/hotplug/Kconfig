@@ -3,8 +3,6 @@ config MAKO_HOTPLUG
  	default n
  	help
  	  Mako Hotplug: A custom hotplug MOD by fransico franco
-<<<<<<< HEAD
-=======
 
 config ALUCARD_HOTPLUG
 	bool "Enable alucard-hotplug cpu hotplug driver"
@@ -75,4 +73,3 @@ config ZEN_DECISION
 config HIMA_HOTPLUG
 	default n
 
->>>>>>> 422ad89... Hotplugs: Added Hima & thunderplug

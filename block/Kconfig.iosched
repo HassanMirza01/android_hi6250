@@ -138,7 +138,6 @@ choice
  		
     config DEFAULT_ZEN
 		bool "ZEN" if IOSCHED_ZEN=y
->>>>>>> 9f88e93... Added SioPlus io
 
 endchoice
 
