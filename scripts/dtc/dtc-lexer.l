@@ -40,6 +40,7 @@ LINECOMMENT	"//".*\n
 #include "dtc-parser.tab.h"
 
 YYLTYPE yylloc;
+extern bool treesource_error;
 
 /* CAUTION: this will stop working if we ever use yyless() or yyunput() */
 #define	YY_USER_ACTION \
